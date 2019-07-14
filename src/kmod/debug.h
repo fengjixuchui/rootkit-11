@@ -15,6 +15,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef DEBUG_H
+#define DEBUG_H
+
 #include "config.h"
 
 #define LOG_LEVEL_DEBUG 0
@@ -46,3 +49,5 @@
 #else
 #define LOGD
 #endif /* LOG_LEVEL <= LOG_LEVEL_DEBUG */
+
+#endif /* DEBUG_H */
