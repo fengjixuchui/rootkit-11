@@ -20,7 +20,8 @@
 
 /* See debug.h for available log levels. */
 #define LOG_LEVEL LOG_LEVEL_INFO
-
+#define ON "on"
+#define OFF "off"
 #define MODULE_NAME "rootkit"
 
 
