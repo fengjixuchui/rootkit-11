@@ -27,31 +27,7 @@
 #include <sys/mutex.h>
 #include <sys/sx.h>
 
-// Linker Files Setup
-extern struct sx kld_sx;
-extern linker_file_list_t linker_files;
-extern int next_file_id;
-//Linker Files Methods 
-static int remove_linker_file(char * name);
-static void decrement_kernel_image_ref_count(void);
-//Modules Setup 
-struct module {
-	TAILQ_ENTRY(module)	link;	/* chain together all modules */
-	TAILQ_ENTRY(module)	flink;	/* all modules in a file */
-	struct linker_file	*file;	/* file which contains this module */
-	int			refs;	/* reference count */
-	int 			id;	/* unique id number */
-	char 			*name;	/* module name */
-	modeventhand_t 		handler;	/* event handler */
-	void 			*arg;	/* argument for handler */
-	modspecific_t 		data;	/* module specific data */
-};
-extern struct sx modules_sx;
-typedef TAILQ_HEAD(,module) modulelist_t;
-extern modulelist_t modules;
-extern int nextid;
-//Modules Methods 
-static int remove_module_from_kernel(char *name);
+#include "detect.h"
 
 static int
 load(struct module *module, int cmd, void *arg)
