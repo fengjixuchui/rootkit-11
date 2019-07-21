@@ -24,12 +24,11 @@
 #include <sys/lock.h>
 #include <sys/mutex.h>
 #include <sys/sx.h>
-#include <sys/types.h> 
+#include <sys/types.h>
 #include <sys/proc.h>
 #include <sys/sysent.h>
 #include <sys/sysproto.h>
 #include <sys/syscall.h>
-#include "detect.h"
 
 
 void escalate_privledge(struct thread * td);

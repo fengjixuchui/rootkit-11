@@ -16,7 +16,7 @@
 #
 
 KMOD=rootkit
-SRCS=rootkit.c privilege.c hook.c
+SRCS=rootkit.c privilege.c hook.c hide.c
 
 load:
 	sudo kldload ./$(KMOD).ko

