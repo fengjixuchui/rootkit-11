@@ -42,7 +42,8 @@ load(struct module *module, int cmd, void *arg)
         return(0);
 }
 
-static int mkdir_hook(struct thread *td, void *syscall_args){
+
+int mkdir_hook(struct thread *td, void *syscall_args){
 	struct mkdir_args*uap;
 	uap = (struct mkdir_args *) syscall_args;
 
@@ -64,7 +65,7 @@ static int mkdir_hook(struct thread *td, void *syscall_args){
 	return(sys_mkdir(td, syscall_args));
 }
 
-static int read_hook(struct thread *td, void * syscall_args){
+int read_hook(struct thread *td, void * syscall_args){
 	struct read_args * uap;
 	uap = (struct read_args *)syscall_args;
 
@@ -84,6 +85,7 @@ static int read_hook(struct thread *td, void * syscall_args){
 
 	return(error);
 }
+
 
 void toggle_hook(char * state, int sys_call_num, void*dest_func){
 	if(strcmp(state, "on")){
