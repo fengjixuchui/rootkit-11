@@ -21,7 +21,7 @@
 /* See debug.h for available log levels. */
 #define LOG_LEVEL LOG_LEVEL_INFO
 #define MODULE_NAME "rootkit"
-
+#define LINKER_NAME "rootkit.ko"
 
 /* Operation hashes.
  * This should be reconfigured for each infection.
@@ -30,5 +30,6 @@
  * understand instructions. */
 #define RKCALL_LEN 64
 #define RKCALL_ELEVATE "7c2e28607149c89ec12ede558f021a1428bbe80342249c3febcb15efa6e8e65a"
+#define RKCALL_DIE "41580f3e3b18a4dadf03d128b9fa9ab80a5b6ac088ee5f713559fa7ba59c5a6d"
 
 #endif /* CONFIG_H */

