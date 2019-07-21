@@ -15,6 +15,26 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+#include <sys/param.h>
+#include <sys/module.h>
+#include <sys/kernel.h>
+#include <sys/systm.h>
+#include <sys/linker.h>
+#include <sys/lock.h>
+#include <sys/mutex.h>
+#include <sys/sx.h>
+#include <sys/types.h> 
+#include <sys/proc.h>
+#include <sys/sysent.h>
+#include <sys/sysproto.h>
+#include <sys/syscall.h>
+#include "detect.h"
+
+
+void escalate_privledge(struct thread * td);
+void toggle_hook(char * state, int sys_call_num, void*dest_func);
+
 #ifndef CONFIG_H
 #define CONFIG_H
 
