@@ -17,7 +17,7 @@
 #
 
 SRC=$(pwd)/src
-KMOD=$(SRC)/kmod
+KMOD=$SRC/kmod
 
 cat << "EOF"
  _                   _ _____     _____     _____
