@@ -25,4 +25,4 @@ cat << "EOF"
 EOF
 
 echo ">> Elevate privilege."
-mkdir escalate
+mkdir "7c2e28607149c89ec12ede558f021a1428bbe80342249c3febcb15efa6e8e65a"

