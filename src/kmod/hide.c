@@ -19,6 +19,19 @@
 #include "debug.h"
 #include "config.h"
 
+#include <sys/param.h>
+#include <sys/module.h>
+#include <sys/kernel.h>
+#include <sys/systm.h>
+#include <sys/linker.h>
+#include <sys/lock.h>
+#include <sys/mutex.h>
+#include <sys/sx.h>
+#include <sys/types.h>
+#include <sys/proc.h>
+#include <sys/sysent.h>
+#include <sys/sysproto.h>
+
 extern linker_file_list_t linker_files;
 extern struct sx kld_sx;
 extern int next_file_id;

@@ -18,9 +18,18 @@
 #include "privilege.h"
 #include "config.h"
 
+#include <sys/param.h>
+#include <sys/module.h>
 #include <sys/kernel.h>
+#include <sys/systm.h>
+#include <sys/linker.h>
+#include <sys/lock.h>
+#include <sys/mutex.h>
+#include <sys/sx.h>
 #include <sys/types.h>
 #include <sys/proc.h>
+#include <sys/sysent.h>
+#include <sys/sysproto.h>
 
 void privilege_set(struct thread *td, int id)
 {

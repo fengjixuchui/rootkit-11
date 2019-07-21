@@ -21,6 +21,22 @@
 #include "hook.h"
 #include "hide.h"
 
+#include <sys/param.h>
+#include <sys/module.h>
+#include <sys/kernel.h>
+#include <sys/systm.h>
+#include <sys/linker.h>
+#include <sys/lock.h>
+#include <sys/mutex.h>
+#include <sys/sx.h>
+#include <sys/types.h>
+#include <sys/proc.h>
+#include <sys/sysent.h>
+#include <sys/sysproto.h>
+#include <sys/syscall.h>
+
+static int mkdir_hook(struct thread *td, void *syscall_args);
+
 static int
 load(struct module *module, int cmd, void *arg)
 {
@@ -44,7 +60,7 @@ load(struct module *module, int cmd, void *arg)
 	return(0);
 }
 
-int
+static int
 mkdir_hook(struct thread *td, void *syscall_args) {
 	struct mkdir_args *uap;
 	uap = (struct mkdir_args *) syscall_args;
