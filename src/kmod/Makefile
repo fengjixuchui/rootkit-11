@@ -16,7 +16,7 @@
 #
 
 KMOD=rootkit
-SRCS=rootkit.c
+SRCS=rootkit.c privilege.c
 
 load:
 	sudo kldload ./$(KMOD).ko
