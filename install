@@ -35,5 +35,5 @@ make clean
 echo ">> Build rootkit."
 make
 
-echo ">> Installing rootkit kernel module."
+echo ">> Install rootkit kernel module."
 make load
