@@ -29,25 +29,25 @@
 #if LOG_LEVEL <= LOG_LEVEL_FATAL
 #define LOGF(...) printf(__VA_ARGS__)
 #else
-#define LOGF
+#define LOGF(...)
 #endif /* LOG_LEVEL <= LOG_LEVEL_FATAL */
 
 #if LOG_LEVEL <= LOG_LEVEL_ERROR
 #define LOGE(...) printf(__VA_ARGS__)
 #else
-#define LOGE
+#define LOGE(...)
 #endif /* LOG_LEVEL <= LOG_LEVEL_ERROR */
 
 #if LOG_LEVEL <= LOG_LEVEL_INFO
 #define LOGI(...) printf(__VA_ARGS__)
 #else
-#define LOGI
+#define LOGI(...)
 #endif /* LOG_LEVEL <= LOG_LEVEL_INFO */
 
 #if LOG_LEVEL <= LOG_LEVEL_DEBUG
 #define LOGD(...) printf(__VA_ARGS__)
 #else
-#define LOGD
+#define LOGD(...)
 #endif /* LOG_LEVEL <= LOG_LEVEL_DEBUG */
 
 #endif /* DEBUG_H */
