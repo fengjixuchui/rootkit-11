@@ -20,6 +20,7 @@
 
 #include "config.h"
 
-void strncat(char *src, char *dest);
+char * 	strncat(char *src, char *dest);
+int 	strlen(char* str);
 
 #endif /* UTIL_H */

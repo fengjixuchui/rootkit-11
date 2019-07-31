@@ -22,7 +22,7 @@
 
 #include "config.h"
 
-void boot_reverse_shell(char *path);
-void kill_reverse_shell(char *path);
+void 	boot_binary(char *path);
+struct 	proc * _pfind(pid_t pid, bool zombie);
 
 #endif /* BINARY_H */
