@@ -19,10 +19,27 @@
 #define BINARY_H
 
 #define BIN_PATH "/boot/modules/data/"
-
 #include "config.h"
 
-void 	boot_binary(char *path);
-struct 	proc * _pfind(pid_t pid, bool zombie);
+#include <sys/param.h>
+#include <sys/systm.h>
+#include <sys/bitstring.h>
+#include <sys/elf.h>
+#include <sys/eventhandler.h>
+#include <sys/exec.h>
+#include <sys/jail.h>
+#include <sys/kernel.h>
+#include <sys/limits.h>
+#include <sys/lock.h>
+#include <sys/loginclass.h>
+#include <sys/malloc.h>
+#include <sys/mman.h>
+#include <sys/mount.h>
+#include <sys/mutex.h>
+#include <sys/proc.h>
+
+
+int boot_binary(char *path);
+struct proc * find_process(pid_t pid);
 
 #endif /* BINARY_H */

