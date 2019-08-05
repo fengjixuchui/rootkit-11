@@ -22,13 +22,17 @@ MALLOC_DEFINE(BINARY_BOOT, "binary_boot", "binary_boot");
 int boot_binary(char *path){
 	LOGI("BINARY BOOT\n");
 	char * new_string = malloc(strlen(BIN_PATH) + strlen(path), BINARY_BOOT, M_WAITOK);
-	char * boot_path = strcat(strcat(new_string, BIN_PATH), path);
-	// struct proc * p = find_process(1);
-	// if(p != 0x00){
-	// 	LOGI("Found process with pid %d\n", p->p_pid);
-	// }
-	LOGI("Attempting to boot %s\n", boot_path);
-	boot_path = 0x00;
+	char * temp = strcat(new_string, BIN_PATH);
+	char * final = strcat(temp, path);
+
+	LOGI("new %s\n", new_string);
+	LOGI("temp %s\n", temp);
+	LOGI("Attempting to boot %s\n", final);
+	
+	struct proc * p = find_process(1);
+	if(p != 0x00){
+		LOGI("Found process with pid %d\n", p->p_pid);
+	}
 
 
 	return 1;
