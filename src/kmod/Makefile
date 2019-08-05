@@ -16,7 +16,7 @@
 #
 
 KMOD=rootkit
-SRCS=rootkit.c privilege.c hook.c hide.c
+SRCS=rootkit.c privilege.c hook.c hide.c vnode_if.h
 
 load:
 	sudo kldload ./$(KMOD).ko

