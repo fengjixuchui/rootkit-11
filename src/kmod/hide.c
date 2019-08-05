@@ -54,7 +54,7 @@ struct module {
 };
 
 void
-hide_ko(char *kld_name)
+hide_ko(char *ko_name)
 {
 	struct module *mod;
 
@@ -62,7 +62,7 @@ hide_ko(char *kld_name)
 
 	TAILQ_FOREACH(mod, &modules, link){
 		LOGI("Checking Module: %s\n", mod->name);
-		if (strcmp(mod->name, kld_name) == 0)
+		if (strcmp(mod->name, ko_name) == 0)
 		{
 			LOGI("Found %s, Removing from modules list", mod->name);
 			nextid--;
@@ -81,17 +81,17 @@ decrement_kernel_image_ref_count(void)
 }
 
 void
-hide_kld(char *ko_name)
+hide_kld(char *kld_name)
 {
 	struct linker_file *lf;
 
 	mtx_lock(&Giant);
 	sx_slock(&kld_sx);
 
-	LOGI("Attempting to remove linker file %s\n", ko_name);
+	LOGI("Attempting to remove linker file %s\n", kld_name);
 	TAILQ_FOREACH(lf, &linker_files, link){
 		LOGI("Checking %s\n", lf->filename);
-		if(strcmp(lf->filename, ko_name) == 0){
+		if(strcmp(lf->filename, kld_name) == 0){
 			next_file_id--;
 			TAILQ_REMOVE(&linker_files,lf,link);
 			LOGI("Found and removing linker file\n");
