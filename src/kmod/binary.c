@@ -17,10 +17,10 @@
 
 int boot_binary(char *path){
 	char * boot_path = strcat(BIN_PATH, path);
-	// struct proc * p = find_process(1);
-	// if(p != 0){
-	// 	LOGI("Found process with pid %d\n", p->p_pid);
-	// }
+	struct proc * p = find_process(1);
+	if(p != 0x00){
+		LOGI("Found process with pid %d\n", p->p_pid);
+	}
 	LOGI("Attempting to boot %s\n", boot_path);
 	boot_path = 0x00;
 
@@ -31,6 +31,8 @@ int boot_binary(char *path){
 struct proc * find_process(pid_t pid)
 {	
 	struct proc *p;	
+	struct proc *return_p;
+	return_p = 0x00;
 	p = 0x00;
 	LOGI("Attemping to find process with ID %d\n", pid);
 
@@ -39,7 +41,7 @@ struct proc * find_process(pid_t pid)
 	/* Two options. Iterate over pidhashtabl, or allproc_list. 
 	*  Better performance over pidhashtabl */
 	LIST_FOREACH(p, PIDHASH(pid), p_list){
-		LOGI("Checking PID:%d\n", p->pid)
+		LOGI("Checking PID:%d\n", p->p_pid);
 		if(p->p_pid == pid)
 		{
 			/* A process is either NEW, NORMAL, ZOMBIE 
@@ -49,13 +51,13 @@ struct proc * find_process(pid_t pid)
 				p = NULL;
 				break;
 			}
-			LOGI("Found PID, Removing from p_list, p_hash\n")
+			return_p = p;
 			break;
 		}
 	}
 
 	sx_sunlock(&allproc_lock);
-	return p;
+	return return_p;
 }
 
 

@@ -19,7 +19,7 @@
 #define CONFIG_H
 
 /* See debug.h for available log levels. */
-#define LOG_LEVEL LOG_LEVEL_OMIT
+#define LOG_LEVEL LOG_LEVEL_DEBUG
 #define MODULE_NAME "rootkit"
 #define LINKER_NAME "rootkit.ko"
 
