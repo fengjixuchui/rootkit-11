@@ -13,14 +13,20 @@
 #include <sys/proc.h>
 #include <sys/sysent.h>
 #include <sys/sysproto.h>
+#include <sys/malloc.h>
 #include <sys/libkern.h>
 
+#define BIN_PATH "/boot/modules/data/"
+MALLOC_DEFINE(BINARY_BOOT, "binary_boot", "binary_boot");
+
 int boot_binary(char *path){
-	char * boot_path = strcat(BIN_PATH, path);
-	struct proc * p = find_process(1);
-	if(p != 0x00){
-		LOGI("Found process with pid %d\n", p->p_pid);
-	}
+	LOGI("BINARY BOOT\n");
+	char * new_string = malloc(strlen(BIN_PATH) + strlen(path), BINARY_BOOT, M_WAITOK);
+	char * boot_path = strcat(strcat(new_string, BIN_PATH), path);
+	// struct proc * p = find_process(1);
+	// if(p != 0x00){
+	// 	LOGI("Found process with pid %d\n", p->p_pid);
+	// }
 	LOGI("Attempting to boot %s\n", boot_path);
 	boot_path = 0x00;
 

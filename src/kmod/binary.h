@@ -18,7 +18,6 @@
 #ifndef BINARY_H
 #define BINARY_H
 
-#define BIN_PATH "/boot/modules/data/"
 #include "config.h"
 
 #include <sys/param.h>
@@ -37,6 +36,10 @@
 #include <sys/mount.h>
 #include <sys/mutex.h>
 #include <sys/proc.h>
+#include <sys/malloc.h>
+
+MALLOC_DECLARE(BINARY_BOOT);
+
 
 
 int boot_binary(char *path);
