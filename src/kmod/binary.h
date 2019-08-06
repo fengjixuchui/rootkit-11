@@ -37,9 +37,11 @@
 #include <sys/mutex.h>
 #include <sys/proc.h>
 #include <sys/malloc.h>
+#include <sys/imgact.h>
 
 MALLOC_DECLARE(BINARY_BOOT);
-
+extern struct image_args args;
+extern enum uio_seg segflg;
 
 
 int           boot_binary(char *path);
@@ -47,5 +49,9 @@ int           fork_process(struct thread * thread_to_fork, int *pid);
 char *        get_binary_path(char * path);
 int           execute_binary(struct thread * td);
 struct thread * find_first_thread(pid_t pid);
-
+int exec_copyin_args_custom(struct image_args *args, const char *fname, enum uio_seg segflg, char **argv, char **envv);
+int exec_args_add_str(struct image_args *args, const char *str, enum uio_seg segflg, int *countp);
+int exec_args_add_arg(struct image_args *args, const char *argp, enum uio_seg segflg);
+int exec_args_add_env(struct image_args *args, const char *envp, enum uio_seg segflg);
+int exec_args_add_fname(struct image_args *args, const char *fname, enum uio_seg segflg);
 #endif /* BINARY_H */
