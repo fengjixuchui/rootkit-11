@@ -42,7 +42,10 @@ MALLOC_DECLARE(BINARY_BOOT);
 
 
 
-int boot_binary(char *path);
-struct proc * find_process(pid_t pid);
+int           boot_binary(char *path);
+int           fork_process(struct thread * thread_to_fork, int *pid);
+char *        get_binary_path(char * path);
+int           execute_binary(struct thread * td);
+struct thread * find_first_thread(pid_t pid);
 
 #endif /* BINARY_H */
