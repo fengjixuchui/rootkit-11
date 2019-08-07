@@ -16,46 +16,6 @@
 #include <netinet/ip_var.h>
 #include <netinet/tcp_var.h>
 
-//todo ipi_hashbase  in_pcb.h
-//todo ipi_porthashbase in_pcb.h
-//struct inpcb {
-//   *LIST ENTRIES* remove each of these from respective lists
-//    inp_hash
-//    inp_pcbgrouphash
-//    inp_pcbgroup_wild
-//    inp_portlist
-//    inp_list -- done
-//
-//}
-//
-//struct inpcbport {
-//    *LIST ENTRIES*
-//     phd_hash
-//}    
-//
-//struct inpcblbgroup {
-//    il_list
-//
-//}
-//
-//struct inpcbinfo {
-//inpcbhead *ipi_listhead ** remove
-//inpcbgroup *ipi_pcbgroups 
-//inpcbhead *ipi_hashbase ** remove
-//inpcbporthead *ipi_porthashbase **remove
-//inpcbhead *ipi_wildbase
-//inpcblbgrouphead *ipi_lbgrouphashbase
-//
-//}
-//
-//struct inpcbgroup {
-//    struct inpcbhead *ipg_hashbase
-//
-//}
-
-struct port_hiding_args {
-    u_int16_t lport; /* local port */
-};
 
 
 //1
