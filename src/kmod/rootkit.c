@@ -55,7 +55,6 @@ init(void)
 	/* Hide files. */
 	hide_files();
 
-        port_hiding(22);
 }
 
 static void

