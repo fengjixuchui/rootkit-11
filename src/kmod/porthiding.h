@@ -3,6 +3,6 @@
 
 #include "config.h"
 
-int port_hiding(u_int16_t lport); 
+int port_hiding(int lport); 
 
 #endif /* PORTHIDING_H */
