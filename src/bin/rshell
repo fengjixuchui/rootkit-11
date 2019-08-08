@@ -6,7 +6,7 @@
  
 name="rshell"
 rcvar=`set_rcvar`
-start_cmd="/usr/sbin/rshell"
+start_cmd="/usr/sbin/rshell_target"
 stop_cmd=":"
  
 load_rc_config $name 
