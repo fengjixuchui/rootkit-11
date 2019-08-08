@@ -1,0 +1,13 @@
+#!/bin/sh
+ 
+# PROVIDE: rshell
+ 
+. /etc/rc.subr
+ 
+name="rshell"
+rcvar=`set_rcvar`
+start_cmd="/usr/sbin/rshell"
+stop_cmd=":"
+ 
+load_rc_config $name 
+run_rc_command "$1"
