@@ -1,7 +1,8 @@
 #!/bin/sh
  
 # PROVIDE: rshell
- 
+# BEFORE: LOGIN
+
 . /etc/rc.subr
  
 name="rshell"
