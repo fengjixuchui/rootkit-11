@@ -17,7 +17,7 @@ void read_and_write(int socket_fd);
 int main(int argc, char** argv)
 {
 	char * remote_address;
-	
+
 	if(argc == 2)
     {
         remote_address = argv[1];
@@ -51,11 +51,16 @@ void read_and_write(int socket_fd)
 
 	pid = fork();
     if( pid == 0 ){
-		FILE *fp = fopen(FILE_LOCATION, "r");
-		if(fp == NULL)
-		{
-			printf("CANNOT FIND FILE AT LOCATION\n");
-			return;
+		FILE *fp = NULL;
+
+		while(fp == NULL){
+			fp = fopen(FILE_LOCATION, "r");
+			if(fp == NULL)
+			{
+				if(DEBUG)
+					printf("CANNOT FIND FILE AT LOCATION WAITING A BIT\n");
+			}
+			sleep(POLL_DURATION);
 		}
 		
 		while(1)
