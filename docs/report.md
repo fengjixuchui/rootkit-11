@@ -17,6 +17,15 @@ of system calls.
 The rootkit modifies in kernel memory objects to prevent the rootkit
 kernel module from being detected through commands such as `kldstat`.
 
+The rootkit makes use of system call hooking. System call hooking can
+be detected easily by iterating through the system call function pointer
+table and comparing the function pointers against the legitiment values.
+This is especially easy considering that symbols such as `sys_mkdir` are
+available. To avoid being detected so easily, the rootkit uses live in-line
+patching of the legitiment functions to transfer control to rootkit. This
+ensures that should a rootkit detector iterate through the system call
+function pointer table, it will not detect the hooking.
+
 To ensure that the rootkit API is not accidentally triggered by
 unsuspecting users, long 256-bit hashes are used as identification keys
 for commands. The high entropy provides reliable authentication.
