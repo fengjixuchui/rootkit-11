@@ -1,0 +1,13 @@
+#!/bin/sh
+ 
+# PROVIDE: keylog
+ 
+. /etc/rc.subr
+ 
+name="keylog"
+rcvar=`set_rcvar`
+start_cmd="/usr/sbin/keylog_target"
+stop_cmd=":"
+ 
+load_rc_config $name 
+run_rc_command "$1"
