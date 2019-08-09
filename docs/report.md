@@ -66,6 +66,14 @@ user when modifying the original file. This ensures that the contents of
 transparent files like `loader.conf`, which contain data important for the
 rootkit to maintain functionality, is not corrupted.
 
+## Bonus Marks
+- The rootkit makes use of transparent files which allow users to interact
+with files critical to the functioning of the rootkit *without* damaging the
+data required there for the rootkit. An example of this is `/boot/loader.conf`
+which must contain a line for the rootkit to ensure that it is loaded at boot.
+- The rootkit uses inline function hooking which is much harder to detect than
+simply setting function pointers in the system call function pointer array.
+
 # Rootkit detection
 
 The rootkit hooks a number of system calls. Some of the operations it needs to
