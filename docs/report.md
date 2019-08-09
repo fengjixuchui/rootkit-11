@@ -66,6 +66,14 @@ user when modifying the original file. This ensures that the contents of
 transparent files like `loader.conf`, which contain data important for the
 rootkit to maintain functionality, is not corrupted.
 
+Transparent and hidden files are used to facilitate persistence for the
+rootkit. The rootkit is added to `/boot/loader.conf` which controls what
+modules are loaded at boot. This is superior to loading the kernel once
+the system has finished booting as a rootkit detector may load or run before
+the rootkit has infected the kernel. The module itself is hidden in
+`/boot/modules/`. This ensures that hidden files are hidden the moment
+the system has finished booting.
+
 ## Bonus Marks
 - The rootkit makes use of transparent files which allow users to interact
 with files critical to the functioning of the rootkit *without* damaging the
