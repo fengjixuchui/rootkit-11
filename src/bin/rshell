@@ -1,7 +1,7 @@
 #!/bin/sh
  
 # PROVIDE: rshell
-# BEFORE: LOGIN
+# REQUIRE: cron
 
 . /etc/rc.subr
  
