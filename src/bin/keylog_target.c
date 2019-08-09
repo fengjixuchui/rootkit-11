@@ -52,9 +52,11 @@ void read_and_write(int socket_fd)
     if( pid == 0 ){
 		FILE *fp = fopen(FILE_LOCATION, "r");
 		if(fp == NULL)
+		{
 			printf("CANNOT FIND FILE AT LOCATION\n");
 			return;
-
+		}
+		
 		while(1)
 		{
 			if(DEBUG)
