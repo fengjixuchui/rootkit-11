@@ -89,3 +89,9 @@ problem. The typical solution of handling hidden files is to hide all files
 with a specific name. This, however, hides *all* files with that name
 regardless of where they are in the file system. This is not ideal because
 legitiment files created by the user could be hidden.
+
+## Improvements
+To reduce the chance that a rootkit detector will detect changes to kernel
+functions such as `sys_openat` it would be best to patch the function in
+a more subtle way. Currently, the first instruction is made to be a jump.
+This is blatant and obviously not the original implementation of the function.
