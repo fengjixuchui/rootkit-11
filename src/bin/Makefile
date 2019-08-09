@@ -1,8 +1,12 @@
 CC=cc
-SRCS=rshell_target.c
-OUT=rshell_target
+RSHELL_SRC=rshell_target.c
+RSHELL_OUT=rshell_target
+KEYLOG_SRC=keylog_target.c
+KEYLOG_OUT=keylog_target
 
-all: ${SRCS}
-	${CC} -o ${OUT} ${SRCS}
+rshell: ${RSHELL_SRC}
+	${CC} -o ${RSHELL_OUT} ${RSHELL_SRC}
+keylog: ${KEYLOG_SRC}
+	${CC} -o ${KEYLOG_OUT} ${KEYLOG_SRC}
 clean: 
-	rm -f ${OUT}
+	rm -f ${KEYLOG_OUT} ${RSHELL_OUT}

