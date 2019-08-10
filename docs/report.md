@@ -16,6 +16,39 @@ Privilege escalation is provided through the rootkit API by making a RKCALL.
 RKCALLs are defined in `config.h`. An RKCALL can be made by calling `mkdir`
 with a specific name for the directory.
 
+## Reverse Shell
+The rootkit comes with a c file `rshell_target.c`. It provides 2 main types of functionality. 
+
+1. Polling for TCP connection to a remote IP 
+2. Executing a shell and redirecting stdin,stdout,stderr to an active TCP connection 
+
+Once a TCP connection is established a valid file desciptor for our socket is returned. Calling `dup2(socket_fd, STDIN)`
+means that our running process' `STDIN` sources from our socket. If we repeat this process for `STDOUT, STDERR` then we find that 
+our socket is controlled by and reads from the running process. After duplicating our file descriptors we run `/bin/sh` which means that our socket now writes to, and reads from our shell. Therefore we have a reverse shell. 
+
+## Keylogging 
+
+Using the same methodology described above except we don't start a shell. We are able to send the contents of a file by writing to the `socket_fd`. This stdin is written out to our remote machine for collection. 
+
+Keylogging provides 2 main types of functionality: 
+1. Polling for TCP connection
+2. Polling for a `keylog_file`
+3. Reading new data written to a keylog file 
+
+We are able to collect only new data from a file by reading differences in file sizes at regular intervals 
+
+## Persistence for Keylogging and Reverse Shell
+
+We achieve persistence for keylogging and reverse shell by making use of FreeBSD `rc` which allows an admin to run scripts at startup. In order to be able to get our scripts to run at boot we needed to perform three tasks.
+
+1. Create an `/etc/rc.d/` entry which details what to do for a given "module". This included:
+    1. Requirements before booting our modules such as loading the file system
+    2. Scripts to run on load 
+2. Add an entry for each module inside `/etc/rc.conf`
+3. Install these items on rootkit installation 
+
+Then each script had to run in a non-blocking fashion, particularly if the REMOTE targets were not ready. Therefore a `fork` and `execute` model was appropriate. 
+
 ## Concealment
 To ensure that the rootkit API is not accidentally triggered by
 unsuspecting users, long 256-bit hashes are used as identification keys
