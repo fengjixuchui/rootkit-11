@@ -20,6 +20,8 @@
 
 #include "config.h"
 
-void hook_syscall_set(int syscall, void *func);
+void hook(void *func, void *hook);
+char *hook_fetch(void *func);
+void hook_set(void *func, char *bytes);
 
 #endif /* HOOK_H */

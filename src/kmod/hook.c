@@ -30,9 +30,41 @@
 #include <sys/proc.h>
 #include <sys/sysent.h>
 #include <sys/sysproto.h>
+#include <sys/malloc.h>
+
+#define PATCH_NBYTES 5
+
+static void
+patch(void *func, void *hook)
+{
+	int diff;
+	char *ptr;
+
+	ptr = (char*) func;
+	diff = (int) (((char *) hook - ptr) - PATCH_NBYTES);
+
+	*ptr = 0xe9;
+	*(int *) (ptr + 1) = diff;
+}
+
+char *
+hook_fetch(void *func)
+{
+	char *buf;
+	buf = malloc(PATCH_NBYTES, M_TEMP, M_WAITOK);
+
+	memcpy(buf, func, PATCH_NBYTES);
+	return(buf);
+}
 
 void
-hook_syscall_set(int syscall, void *func)
+hook_set(void *func, char *bytes)
 {
-	sysent[syscall].sy_call = (sy_call_t *) func;
+	memcpy(func, bytes, PATCH_NBYTES);
+}
+
+void
+hook(void *func, void *hook)
+{
+	patch(func, hook);
 }

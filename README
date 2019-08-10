@@ -2,6 +2,7 @@ A rootkit for FreeBSD 12.0-RELEASE.
 
 Maintained by:
 Jasper Lowell (https://github.com/jtalowell) &
-Wesley Hamburger (https://github.com/wezham)
+Wesley Hamburger (https://github.com/wezham) &
+David Morris (https://github.com/DavidMorris97)
 
 Licensed under GPL3.
