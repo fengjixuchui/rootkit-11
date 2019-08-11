@@ -1,3 +1,4 @@
 #!/bin/sh
 
+echo "Please be patient we are polling this port. Delays may occur..."
 nc $1 -lv 2000
