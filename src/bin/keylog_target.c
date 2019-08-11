@@ -18,7 +18,8 @@ FILE* open_keylog_file();
 int main(int argc, char** argv)
 {
 	char * remote_address;
-	int pid, sock;
+	int sock;
+	int pid = -1;
 
 	if(argc == 2)
     {

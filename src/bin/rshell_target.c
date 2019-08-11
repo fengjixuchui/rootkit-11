@@ -17,7 +17,8 @@ void execute_shell(int sock);
 int main(int argc, char** argv)
 {
     char * remote_address;
-    int sock, pid;
+    int sock;
+    int pid = -1;
 	if(argc == 2)
     {
         remote_address = argv[1];
