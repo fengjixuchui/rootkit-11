@@ -63,6 +63,13 @@ in kernel memory objects includes the loaded module list and the linker list.
 When iterating through these lists the nodes identifying the rootkit can
 be removed using macros.
 
+One of the RKCALLs provided by the rootkit hides the caller process from the
+system. Userland binaries providing functionality for keylogging and the
+reverse shell for instance, can make this API call at the beginning of their
+execution to hide themselves from the system. This is done by removing the
+process from `p_list` and `p_hash` - two internal kernel data structures used
+for recording the running processes on the system.
+
 The rootkit makes use of system call hooking. Simple system call hooking can
 be detected easily by iterating through the system call function pointer
 table and comparing the function pointers against the legitiment values.
