@@ -153,11 +153,7 @@ legitiment files created by the user could be hidden.
 
 The extra features of the rootkit, specifically the remote shell, keylogging,
 and data exfiltration increase the traces that the rootkit leaves on the
-system. This makes it easier to detect. While the ports used are hidden by the
-rootkit on the infected system, it would be possible to scan the system for
-open ports from another machine on the same network. Furthermore, it would
-be possible to capture the packets as they left the system and inspect their
-contents.
+system. This makes it easier to detect. 
 
 ## Improvements
 To reduce the chance that a rootkit detector will detect changes to kernel
@@ -165,6 +161,8 @@ functions such as `sys_openat` it would be best to patch the function in
 a more subtle way. Currently, the first instruction is made to be a jump.
 This is blatant and obviously not the original implementation of the function.
 
+Unfortunately we weren't able to implement TCP port hiding but this would be an
+important addition to conceal active TCP connections. 
 It would be ideal if the remote shell and exfiltration features were not
 constantly enabled to reduce the chance of being detected. A possible
 improvement would be to icmp knocking to notify the system that the remote
@@ -172,3 +170,6 @@ machine was ready to recieve or send data. Additionally, there would be some
 benefit to obscuring the data being sent and recieved along with sending it
 pretending to be an application that *should* send and recieve data across the
 internet.
+
+Furthermore if we were able to piggyback on another `rc.d` script on boot
+we wouldn't need to worry the configuration overhead of `rc`.
