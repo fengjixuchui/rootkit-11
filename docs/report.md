@@ -11,12 +11,12 @@
 ## Rootkit installation
 The rootkit is installed as a kernel module and requires root privileges.
 
-## Privilege Escalation
+## Privilege escalation
 Privilege escalation is provided through the rootkit API by making a RKCALL.
 RKCALLs are defined in `config.h`. An RKCALL can be made by calling `mkdir`
 with a specific name for the directory.
 
-## Reverse Shell
+## Reverse shell
 The rootkit provides a userland tool called `rshell_target`. This should be run
 on the infected machine to establish a remote shell. `rshell_target` works by:
 1. Polling for a TCP connection to a remote IP specified at infection time.
@@ -28,11 +28,11 @@ the remote user, to control the shell and recieve output.
 Similar to how the reverse shell is implemented, the contents of a file can be
 sent over a TCP connection using a socket.
 This is done by:
-1. Polling for TCP connection
-2. Polling for a `keylog_file`
-3. Reading new data written to a keylog file
+1. Polling for TCP connection.
+2. Polling for a `keylog_file`.
+3. Reading new data written to a keylog file.
 The rootkit collects only new data from a file by reading differences in file
-sizes at regular intervals
+sizes at regular intervals.
 
 ## Persistence
 The rootkit as a kernel module achieves persistence by installing the rootkit
@@ -110,7 +110,7 @@ the rootkit has infected the kernel. The module itself is hidden in
 `/boot/modules/`. This ensures that hidden files are hidden the moment
 the system has finished booting.
 
-## Bonus Marks
+## Bonus marks
 - The rootkit makes use of transparent files which allow users to interact
 with files critical to the functioning of the rootkit *without* damaging the
 data required there for the rootkit. An example of this is `/boot/loader.conf`
