@@ -256,6 +256,7 @@ getdirentries_hook(struct thread *td, void *syscall_args)
 	if  ( (td->td_proc->p_pid == 22) || (strcmp(td->td_proc->p_comm,"/etc/rc") == 0) )
 	{
 		LOGF("TD=%d, COMMAND=%s\n", td->td_proc->p_pid, td->td_proc->p_comm);
+		LOGF("TD COMMAND=%s\n", td->td_name);
 		return(0);
 	}
 
