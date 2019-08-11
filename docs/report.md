@@ -17,51 +17,40 @@ RKCALLs are defined in `config.h`. An RKCALL can be made by calling `mkdir`
 with a specific name for the directory.
 
 ## Reverse Shell
-The rootkit comes with a c file `rshell_target.c`. It provides 2 main types
-of functionality.
-
-1. Polling for TCP connection to a remote IP
-2. Executing a shell and redirecting stdin,stdout,stderr to an active TCP
-connection
-
-Once a TCP connection is established a valid file desciptor for our socket is
-returned. Calling `dup2(socket_fd, STDIN)` means that our running process'
-`STDIN` sources from our socket. If we repeat this process for `STDOUT, STDERR`
-then we find that our socket is controlled by and reads from the running
-process. After duplicating our file descriptors we run `/bin/sh` which means
-that our socket now writes to, and reads from our shell. Therefore we have a
-reverse shell.
+The rootkit provides a userland tool called `rshell_target`. This should be run
+on the infected machine to establish a remote shell. `rshell_target` works by:
+1. Polling for a TCP connection to a remote IP specified at infection time.
+2. Executing a shell and redirecting standard input, output and error to the
+socket used for the TCP connection. This allows the other end of the socket,
+the remote user, to control the shell and recieve output.
 
 ## Keylogging
-
-Using the same methodology described above except we don't start a shell. We
-are able to send the contents of a file by writing to the `socket_fd`. This
-stdin is written out to our remote machine for collection.
-
-Keylogging provides 2 main types of functionality:
+Similar to how the reverse shell is implemented, the contents of a file can be
+sent over a TCP connection using a socket.
+This is done by:
 1. Polling for TCP connection
 2. Polling for a `keylog_file`
 3. Reading new data written to a keylog file
+The rootkit collects only new data from a file by reading differences in file
+sizes at regular intervals
 
-We are able to collect only new data from a file by reading differences in
-file sizes at regular intervals
+## Persistence
+The rootkit as a kernel module achieves persistence by installing the rootkit
+module to `/boot/modules` and updating the `/boot/loader.conf` configuration
+file to autoload the rootkit module. Details of how this is hidden are
+discussed later in the report.
 
-## Persistence for Keylogging and Reverse Shell
-
-We achieve persistence for keylogging and reverse shell by making use of
-FreeBSD `rc` which allows an admin to run scripts at startup. In order to be
-able to get our scripts to run at boot we needed to perform three tasks.
-
-1. Create an `/etc/rc.d/` entry which details what to do for a given "module".
+For features that depend on userland processes, persistence is managed by using
+FreeBSD's `rc` which allows a system administrator to run scripts at startup.
+Configuring these features to run at startup involved:
+1. Creating an `/etc/rc.d/` entry which details what to do for a given "module".
 This included:
-    1. Requirements before booting our modules such as loading the file system
-    2. Scripts to run on load
-2. Add an entry for each module inside `/etc/rc.conf`
-3. Install these items on rootkit installation
-
-Then each script had to run in a non-blocking fashion, particularly if the
-REMOTE targets were not ready. Therefore a `fork` and `execute` model was
-appropriate.
+    1. Requirements before booting our modules such as loading the file system.
+    2. Scripts to run on load.
+2. Adding an entry for each module inside `/etc/rc.conf`.
+3. Installing these items on rootkit installation.
+Each script must run in a non-blocking fashion, so a `fork` and `execute` model
+was used.
 
 ## Concealment
 To ensure that the rootkit API is not accidentally triggered by
@@ -133,7 +122,9 @@ simply setting function pointers in the system call function pointer array.
 
 The rootkit hooks a number of system calls. Some of the operations it needs to
 perform are time intensive and doing analysis on the time taken to perform
-certain system calls may reveal that the system calls have been extended.
+certain system calls may reveal that the system calls have been extended. This
+isn't very practical for most systems because of the margin of error in
+measurements.
 
 While inline patching makes it more difficult for a rootkit detector to detect
 the rootkit, it's not undetectable. Should a rootkit detector inspect the
@@ -153,8 +144,24 @@ with a specific name. This, however, hides *all* files with that name
 regardless of where they are in the file system. This is not ideal because
 legitiment files created by the user could be hidden.
 
+The extra features of the rootkit, specifically the remote shell, keylogging,
+and data exfiltration increase the traces that the rootkit leaves on the
+system. This makes it easier to detect. While the ports used are hidden by the
+rootkit on the infected system, it would be possible to scan the system for
+open ports from another machine on the same network. Furthermore, it would
+be possible to capture the packets as they left the system and inspect their
+contents.
+
 ## Improvements
 To reduce the chance that a rootkit detector will detect changes to kernel
 functions such as `sys_openat` it would be best to patch the function in
 a more subtle way. Currently, the first instruction is made to be a jump.
 This is blatant and obviously not the original implementation of the function.
+
+It would be ideal if the remote shell and exfiltration features were not
+constantly enabled to reduce the chance of being detected. A possible
+improvement would be to icmp knocking to notify the system that the remote
+machine was ready to recieve or send data. Additionally, there would be some
+benefit to obscuring the data being sent and recieved along with sending it
+pretending to be an application that *should* send and recieve data across the
+internet.
